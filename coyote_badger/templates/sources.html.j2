@@ -1,0 +1,309 @@
+{% extends "bootstrap/base.html" %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+      /**
+       * Constant elements
+       */
+      let shouldLogin = false;
+      let pullsInProgress = 0;
+      let pullsCompleted = 0;
+      const progressBar = $('#progress-bar');
+      const pullSourcesButton = $('#pull-sources');
+      const saveSourcesButton = $('#save-sources');
+      const resultStyles = {
+        '{{ Result.NOT_STARTED.value }}': 'default',
+        '{{ Result.IN_PROGRESS.value }}': 'info',
+        '{{ Result.SUCCESS.value }}': 'success',
+        '{{ Result.NO_ATTEMPT.value }}': 'warning',
+        '{{ Result.NOT_FOUND.value }}': 'danger',
+        '{{ Result.FAILURE.value }}': 'danger',
+      };
+
+      /**
+       * Getters for row data, which may changed/added to
+       */
+      const getRows = () => $('#sources tbody tr');
+      const getRow = (index) => getRows()[index];
+
+      const getIndex = (row) => $(row).children('td:nth-child(1)');
+      const getLongCite = (row) => $(row).children('td:nth-child(2)');
+      const getShortCite = (row) => $(row).children('td:nth-child(3)');
+      const getFilename = (row) => $(row).children('td:nth-child(4)');
+      const getKind = (row) => $(row).children('td:nth-child(5)');
+      const getResult = (row) => $(row).children('td:nth-child(6)');
+      const getActions = (row) => $(row).children('td:nth-child(7)');
+      const getStartButton = (row) => getActions(row).find('.pull-source');
+
+      const getSourceData = (row) => ({
+        index: parseInt(getIndex(row).text()),
+        long_cite: $.trim(getLongCite(row).text()),
+        short_cite: $.trim(getShortCite(row).text()),
+        filename: $.trim(getFilename(row).text()),
+        kind: $.trim(getKind(row).find('select').val()),
+        result: $.trim(getResult(row).text()),
+      });
+
+      const setResult = (row, result) => {
+        const label = getResult(row).children('span.label');
+        label
+          .attr('class', `label label-${resultStyles[result]}`)
+          .text(result);
+      };
+
+      /**
+       * Helpers
+       */
+      const updateProgressBar = () => {
+        const percent = `${Math.trunc(Math.ceil(pullsCompleted / pullsInProgress * 100))}%`;
+        progressBar
+          .prop('aria-valuemax', pullsInProgress)
+          .prop('aria-valuenow', pullsCompleted)
+          .css('width', percent)
+          .text(`${percent} (${pullsCompleted} of ${pullsInProgress})`)
+          .addClass('progress-bar-striped active')
+          .removeClass('progress-bar-success');
+      };
+
+      const incrementRequestsInProgress = () => {
+        if (pullsCompleted >= pullsInProgress) {
+          pullsCompleted = 0;
+          pullsInProgress = 0;
+        }
+        pullsInProgress += 1;
+        updateProgressBar();
+      };
+
+      const incrementRequestsCompleted = () => {
+        pullsCompleted += 1;
+        updateProgressBar();
+        if (pullsCompleted >= pullsInProgress) {
+          progressBar
+            .removeClass('progress-bar-striped active')
+            .addClass('progress-bar-success');
+        }
+      };
+
+      const saveSources = () => {
+        return fetch('{{ url_for("sources", project_name=project_name) }}', {
+          method: 'POST',
+          body: JSON.stringify($.map(getRows(), getSourceData)),
+          headers: { 'Content-Type': 'application/json' },
+        })
+          .catch((e) => console.log('Error: could not save sources', e));
+      };
+
+      const isLoggedIn = () => {
+        return fetch('{{ url_for("pull") }}', {
+          method: 'GET',
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              window.location = '{{ url_for("login") }}?project={{ project_name }}';
+              return false;
+            }
+            return true;
+          })
+          .catch((e) => console.log('Error: could not confirm log in', e));
+      };
+
+      const pullSource = (row) => {
+        getStartButton(row).prop('disabled', true);
+        setResult(row, '{{ Result.IN_PROGRESS.value }}');
+        return fetch('{{ url_for("pull") }}', {
+          method: 'POST',
+          body: JSON.stringify({
+            project_name: '{{ project_name }}',
+            index: parseInt(getIndex(row).text()),
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setResult(row, data.result);
+            getStartButton(row).prop('disabled', false);
+          })
+          .catch((e) => console.log('Error: could not pull source', e))
+          .finally(() => incrementRequestsCompleted());
+      };
+
+      /**
+       * Handlers for buttons
+       */
+      $('.pull-source').on('click', async function(e) {
+        e.preventDefault();
+        $(this).prop('disabled', true)
+        await saveSources();
+        if (!await isLoggedIn()) return;
+        incrementRequestsInProgress();
+        await pullSource($(this).closest('tr'));
+        $(this).prop('disabled', false)
+      });
+
+      pullSourcesButton.on('click', async function(e) {
+        e.preventDefault();
+        $(this).prop('disabled', true)
+        $(this).button('saving');
+        await saveSources();
+        $(this).button('checking');
+        if (!await isLoggedIn()) return;
+        $(this).button('loading');
+        const rows = getRows();
+        for (const row of rows) {
+          incrementRequestsInProgress();
+        }
+        for (const row of rows) {
+          await pullSource(row);
+        }
+        $(this).button('reset');
+        $(this).prop('disabled', false)
+      });
+
+      saveSourcesButton.on('click', async function(e) {
+        e.preventDefault();
+        $(this).prop('disabled', true)
+        $(this).button('loading');
+        await saveSources();
+        $(this).button('reset');
+        $(this).prop('disabled', false)
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block title %}Coyote Badger - Sources{% endblock %}
+
+{% block content %}
+  {% include "navbar.html.j2" %}
+  <div class="container-fluid">
+    <h1>{{ project_name }}</h1>
+
+    <p>
+      <div class="btn-toolbar" role="toolbar">
+        <button
+          id="pull-sources"
+          type="button"
+          class="btn btn-success"
+          data-saving-text="Saving changes..."
+          data-checking-text="Checking login..."
+          data-loading-text="Pulling..."
+        >
+          Start Pulling
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        </button>
+        <button
+          id="save-sources"
+          type="button"
+          class="btn btn-default pull-right"
+          data-loading-text="Saving..."
+        >
+          Save Changes
+          <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+        </button>
+      </div>
+    </p>
+
+    <div class="progress">
+      <div
+        id="progress-bar"
+        class="progress-bar"
+        role="progressbar"
+        aria-valuenow="0"
+        aria-valuemin="0"
+        aria-valuemax="{{ sources | length }}"
+      >
+      </div>
+    </div>
+
+    <div class=".table-responsive">
+      <table
+        id="sources"
+        class="table table-condensed table-bordered table-hover"
+      >
+        <thead>
+          <tr>
+            <th class="col-md-1"># (of {{ sources | length }})</th>
+            <th class="col-md-3">Citation <span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></th>
+            <th class="col-md-2">Short Citation <span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></th>
+            <th class="col-md-2">Filename <span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></th>
+            <th class="col-md-2">Type <span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></th>
+            <th class="col-md-1">Result</th>
+            <th class="col-md-1">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for source in sources %}
+            <tr>
+              <td>
+                {{ loop.index }}
+              </td>
+              <td
+                contenteditable="true"
+                style="font-size: 12px; word-break: break-all;"
+              >
+                {{ source.long_cite }}
+              </td>
+              <td
+                contenteditable="true"
+                style="font-size: 12px; word-break: break-all;"
+              >
+                {{ source.short_cite }}
+              </td>
+              <td
+                contenteditable="true"
+                style="font-size: 12px; word-break: break-all;"
+              >
+                {{ source.filename }}
+              </td>
+              <td>
+                <select class="form-control">
+                  {% for kind in Kind %}
+                    <option
+                      value="{{ kind.value }}"
+                      {% if source.kind == kind.value %}selected{% endif %}
+                    >
+                      {{ kind.value }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <span
+                  {% if source.result == Result.NOT_STARTED.value %}
+                    class="label label-default"
+                  {% elif source.result == Result.IN_PROGRESS.value %}
+                    class="label label-info"
+                  {% elif source.result == Result.SUCCESS.value %}
+                    class="label label-success"
+                  {% elif source.result == Result.NO_ATTEMPT.value %}
+                    class="label label-warning"
+                  {% elif source.result == Result.NOT_FOUND.value %}
+                    class="label label-danger"
+                  {% elif source.result == Result.FAILURE.value %}
+                    class="label label-danger"
+                  {% else %}
+                    class="label label-default"
+                  {% endif %}
+                  style="display: inline-block;"
+                >
+                  {{ source.result }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-success pull-source"
+                >
+                  <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

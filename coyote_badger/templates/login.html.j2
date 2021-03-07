@@ -1,0 +1,224 @@
+{% extends "bootstrap/base.html" %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js" integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function() {
+      /**
+       * Constants
+       */
+      const passphrase = 'eW61XJrKCz9FikN6OBTOP95T8NpoArKzBN1v';
+      const rememberCheckbox = $('#remember');
+      const fields = [
+        'hein_username',
+        'hein_password',
+        'westlaw_username',
+        'westlaw_password',
+        'ssrn_username',
+        'ssrn_password',
+      ];
+
+      /**
+       * Functions
+       */
+      const loadCredentials = () => {
+        fields.forEach((field) => {
+          const value = localStorage.getItem(field) || '';
+          const decrypted = CryptoJS.AES.decrypt(value, passphrase).toString(CryptoJS.enc.Utf8);
+          if (value) {
+            $(`input[name="${field}"]`).val(decrypted);
+            rememberCheckbox.prop('checked', true);
+          }
+        });
+      };
+
+      const saveCredentials = () => {
+        fields.forEach((field) => {
+          const value = $(`input[name="${field}"]`).val();
+          const encrypted = CryptoJS.AES.encrypt(value, passphrase);
+          if (value) {
+            localStorage.setItem(field, encrypted);
+          }
+        });
+      };
+
+      const eraseCredentials = () => {
+        fields.forEach((field) => {
+          localStorage.removeItem(field);
+        });
+      };
+
+      /**
+       * Setup
+       */
+      loadCredentials();
+
+      /**
+       * Handlers for buttons
+       */
+      $('#login button').on('click', function() {
+        // Store the usernames and passwords if requested
+        if (rememberCheckbox.is(':checked')) {
+          saveCredentials();
+        } else {
+          eraseCredentials();
+        }
+        $(this).button('loading');
+        $('#duo-warning').removeClass('hidden');
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block title %}Coyote Badger - Login{% endblock %}
+
+{% block content %}
+  {% include "navbar.html.j2" %}
+
+  <div class="container">
+    {# NEEDS LOGIN MESSAGE #}
+    {% if request.args.get('project') %}
+      <div class="alert alert-info" role="alert">
+        <b>Oops!</b>
+        It looks like you need to log in to the source providers in order
+        to pull these sources.
+      </div>
+    {% endif %}
+
+    <h1>Log in</h1>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p>
+          Your Hein and Westlaw usernames and passwords are needed to log in to the services.
+          Please enter them below and press <code>Log in</code>. Be prepared to provide Duo
+          push notification (if call or text are your default preferences, this will not work)
+          assistance when this program is running.
+        </p>
+        <p>
+          Your passwords <b>are not</b> shared anywhere. If you select the checkbox to remember
+          your passwords, they'll be encrypted and saved to your local browser storage.
+          <b>Do not select this on shared computers</b>.
+        </p>
+        <div class="alert alert-warning" role="alert">
+          <b>Heads up!</b> You will not be able to use Hein or Westlaw while this program
+          is running. Running this program will log you out of your other session, and
+          you can only have one active session at a time.
+        </div>
+        <form
+          id="login"
+          action="{{ url_for('login') }}{{ '?project=' + request.args.get('project') if request.args.get('project') else ''}}"
+          method="POST"
+        >
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="hein_username">Hein username</label>
+                <input
+                  name="hein_username"
+                  type="text"
+                  class="form-control"
+                  placeholder="Username"
+                  required
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="hein_password">Hein password</label>
+                <input
+                  name="hein_password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="westlaw_username">Westlaw username</label>
+                <input
+                  name="westlaw_username"
+                  type="text"
+                  class="form-control"
+                  placeholder="Username"
+                  required
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="westlaw_password">Westlaw password</label>
+                <input
+                  name="westlaw_password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="ssrn_username">SSRN username</label>
+                <input
+                  name="ssrn_username"
+                  type="text"
+                  class="form-control"
+                  placeholder="Username"
+                  required
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="ssrn_password">SSRN password</label>
+                <input
+                  name="ssrn_password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input id="remember" type="checkbox" />
+              Remember passwords in browser storage for next time (do not use on shared computers!)
+            </label>
+          </div>
+
+          {# RESULT ERROR #}
+          {% if error %}
+            <div class="alert alert-danger" role="alert">
+              <b>Error!</b>
+              {{ error }}
+            </div>
+          {% endif %}
+          <button
+            class="btn btn-primary"
+            type="submit"
+            data-loading-text="Logging in..."
+          >
+            Log in
+          </button>
+          <span
+            id="duo-warning"
+            class="hidden text-success"
+          >
+            Be prepared to accept Duo!
+          </span>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

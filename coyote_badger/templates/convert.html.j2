@@ -1,0 +1,54 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Coyote Badger - Create Sources Template{% endblock %}
+
+{% block content %}
+  {% include "navbar.html.j2" %}
+
+  <div class="container">
+    <h1>Create Sources Template</h1>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p>
+          To create a source inventory Excel sheet, upload an article
+          or note that contains footnotes below and then press <code>Create</code>.
+          When it's finished, you'll be presented with a download dialog.
+          Depending on how many sources are in the article or note, this
+          may take up to a minute.
+        </p>
+        <form
+          action="{{ url_for('convert') }}"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div class="form-group">
+            <label for="file">Article or note</label>
+            <input
+              name="file"
+              type="file"
+              accept=".doc,.docx"
+              class="form-control"
+              required
+            />
+          </div>
+
+          {# ERROR #}
+          {% if error %}
+            <div class="alert alert-danger" role="alert">
+              <b>Error!</b>
+              {{ error }}
+            </div>
+          {% endif %}
+          <button
+            id="create-button"
+            class="btn btn-primary"
+            type="submit"
+            data-loading-text="Creating..."
+          >
+            Create
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

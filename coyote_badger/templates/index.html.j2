@@ -1,0 +1,103 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Coyote Badger - Home{% endblock %}
+
+{% block content %}
+  {% include "navbar.html.j2" %}
+
+  <div class="container">
+    <h1>Home</h1>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          New Project
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p>
+          First, complete a source template by either: (a) making one from scratch in Excel
+          <a href="{{ url_for('download_sources_template') }}" target="_blank">here</a>,
+          or (b) generating one from an article/note Word doc
+          <a href="{{ url_for('convert') }}">here</a>.
+          Then, name your project and upload your completed sources template.
+        </p>
+        <form
+          action="{{ url_for('index') }}"
+          method="POST"
+          enctype="multipart/form-data"
+          autocomplete="off"
+        >
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="name">Name (no spaces or special characters)</label>
+                <input
+                  name="name"
+                  type="text"
+                  class="form-control"
+                  placeholder="e.g., VOL100-ISS01-Smith"
+                  pattern="[a-zA-Z0-9_\-]{1,100}"
+                  spellcheck="false"
+                  required
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="file">Completed sources template</label>
+                <input
+                  name="file"
+                  type="file"
+                  accept=".xls,.xlsx"
+                  class="form-control"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {# ERROR #}
+          {% if error %}
+            <div class="alert alert-danger" role="alert">
+              <b>Error!</b>
+              {{ error }}
+            </div>
+          {% endif %}
+          <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Past Projects
+        </h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th class="col-md-2"># (of {{ projects | length }})</th>
+              <th class="col-md-10">Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for project in projects %}
+              <tr>
+                <td>
+                  {{ loop.index }}
+                </td>
+                <td>
+                  <a href="{{ url_for('sources', project_name=project) }}">
+                    {{ project }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

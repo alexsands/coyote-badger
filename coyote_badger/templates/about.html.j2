@@ -1,0 +1,28 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Coyote Badger - About{% endblock %}
+
+{% block content %}
+  {% include "navbar.html.j2" %}
+  <div class="container">
+    <h1>About</h1>
+    <p>
+      Coyote Badger is designed to take a spreadsheet of accurately bluebooked
+      citations and search for them. Basically, it opens and controls a Chrome
+      browser in the background to do what an editor would be doing manually.
+    </p>
+    <p>
+      It will search for the source on Hein, Westlaw, or SSRN. If it cannot
+      find a source, it will proceed to the next one. If it finds a source,
+      it downloads it in the same way that a user would. At the end, it returns
+      a spreadsheet, which shows whether the source was found and what type of
+      source it is, along with a folder containing all the downloaded files.
+    </p>
+    <p>
+      Why is it named Coyote Badger?
+      <a href="https://www.youtube.com/watch?v=6RC_6teBS6o" target="_blank">
+        This is why.
+      </a>
+    </p>
+  </div>
+{% endblock %}

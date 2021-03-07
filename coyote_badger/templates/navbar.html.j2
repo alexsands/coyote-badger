@@ -1,0 +1,37 @@
+{% block navbar %}
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+          Coyote Badger
+        </a>
+      </div>
+
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          {% for route, name in [('index', 'Home'), ('convert', 'Convert'), ('about', 'About')] %}
+            <li
+              {% if request.path == url_for(route) %} class="active" {% endif %}
+            >
+              <a href="{{ url_for(route) }}">
+                {{ name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+          {% for route, name in [('login', 'Login')] %}
+            <li
+              {% if request.path == url_for(route) %} class="active" {% endif %}
+            >
+              <a href="{{ url_for(route) }}">
+                {{ name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+{% endblock %}
