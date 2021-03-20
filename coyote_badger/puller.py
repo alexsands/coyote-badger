@@ -51,13 +51,7 @@ class Puller(object):
     @property
     def context(self):
         if not self._context:
-            # Remove the existing browser user data folder and create
-            # a new one for a fresh start
-            if (os.path.exists(self.BROWSER_USER_DATA_DIR)
-                    and os.path.isdir(self.BROWSER_USER_DATA_DIR)):
-                shutil.rmtree(self.BROWSER_USER_DATA_DIR)
-            os.mkdir(self.BROWSER_USER_DATA_DIR)
-            # Create the persistent context
+            self.clear_user_data()
             extensions = ','.join([
                 os.path.join(self.EXTENSIONS_FOLDER, 'ublock'),
                 os.path.join(self.EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
@@ -139,9 +133,17 @@ class Puller(object):
             and self.westlaw_authenticated
             and self.ssrn_authenticated)
 
+    def close_context(self):
+        self.context.close()
+        self._context = None
+
+    def clear_user_data(self):
+        if (os.path.exists(self.BROWSER_USER_DATA_DIR)
+                and os.path.isdir(self.BROWSER_USER_DATA_DIR)):
+            shutil.rmtree(self.BROWSER_USER_DATA_DIR)
+        os.mkdir(self.BROWSER_USER_DATA_DIR)
+
     def login_hein(self, hein_username, hein_password):
-        if self.hein_authenticated:
-            return
         page = self.context.new_page()
         try:
             page.goto(self.HEIN_SIGN_IN_URL)
@@ -155,8 +157,6 @@ class Puller(object):
             page.close()
 
     def login_westlaw(self, westlaw_username, westlaw_password):
-        if self.westlaw_authenticated:
-            return
         page = self.context.new_page()
         try:
             page.goto(self.WESTLAW_SIGN_IN_URL)
@@ -171,8 +171,6 @@ class Puller(object):
         self._configure_westlaw()
 
     def login_ssrn(self, ssrn_username, ssrn_password):
-        if self.ssrn_authenticated:
-            return
         page = self.context.new_page()
         try:
             page.goto(self.SSRN_SIGN_IN_URL)
@@ -203,6 +201,8 @@ class Puller(object):
         for Westlaw, Hein, etc. and logs in. In some cases,
         it will also wait for the user to accept a Duo/2FA prompt.
         '''
+        if not self.all_authenticated:
+            self.close_context()
         self.login_hein(hein_username, hein_password)
         self.login_westlaw(westlaw_username, westlaw_password)
         self.login_ssrn(ssrn_username, ssrn_password)
