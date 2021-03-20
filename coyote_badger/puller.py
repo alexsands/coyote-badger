@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 
 from urllib.request import urlretrieve
 from fake_useragent import UserAgent
@@ -50,6 +51,13 @@ class Puller(object):
     @property
     def context(self):
         if not self._context:
+            # Remove the existing browser user data folder and create
+            # a new one for a fresh start
+            if (os.path.exists(self.BROWSER_USER_DATA_DIR)
+                    and os.path.isdir(self.BROWSER_USER_DATA_DIR)):
+                shutil.rmtree(self.BROWSER_USER_DATA_DIR)
+            os.mkdir(self.BROWSER_USER_DATA_DIR)
+            # Create the persistent context
             extensions = ','.join([
                 os.path.join(self.EXTENSIONS_FOLDER, 'ublock'),
                 os.path.join(self.EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
@@ -168,6 +176,13 @@ class Puller(object):
         page = self.context.new_page()
         try:
             page.goto(self.SSRN_SIGN_IN_URL)
+            try:
+                # Click the "Accept all cookies" button if it appears
+                page.click('#onetrust-accept-btn-handler', timeout=5 * 1000)
+            except Exception:
+                # Just ignore failures because they may remove this
+                # button and just allow normal signing in
+                pass
             page.fill('input[name="input-email"]', ssrn_username)
             page.fill('input[name="input-pass"]', ssrn_password)
             page.click('#signinBtn')

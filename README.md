@@ -70,7 +70,7 @@ system:
 3. Copy and paste the following into Command Prompt and press <kbd>Enter</kbd>
 ```sh
 docker build . -t coyotebadger:latest
-docker run -it --rm --name coyotebadger --memory="2g" --cpus="2" --tmpfs /tmp/coyotebadger/chrome -v "$(pwd)"/_projects:/opt/coyotebadger/_projects -p 5000:5000 coyotebadger:latest
+docker run -it --rm --name coyotebadger --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 5000:5000 coyotebadger:latest
 ```
 4. You'll start to see it printing out information. Wait
    until you see `Running on http://0.0.0.0:5000/`. If it's your first
@@ -101,7 +101,7 @@ Then run the project with:
 FLASK_ENV=development python3 -m coyote_badger.app
 ```
 
-The project is generally structure as follows:
+The project is generally structured as follows:
 1. `/_projects`: holds the project data and is mounted to the Docker container
    as a volume.
 2. `/coyote_badger/extensions`: these are the Chrome extensions that get added
@@ -132,12 +132,13 @@ an email about it. I'll happily take a look and try to help.
 
 
 ## Videos
-
-- [Running and Using Coyote Badger](https://youtu.be/2kK8G_dHtWQ)
+- [Starting & Stopping](https://youtu.be/Pzyfdr_b198)
+- [Creating a Source Inventory Template](https://youtu.be/p2cW8tUTOHU)
+- [Pulling Sources](https://youtu.be/ypmY4Hfn5Rg)
 
 ## FAQ
-**When I try to run the application, I get a message about Docker not
-being started. What do I do?**
+**When I try to run the application, I get a message about not being
+able to connect to the Docker daemon. What do I do?**
 
 Make sure you open the Docker application and click Start before trying
 to run Coyote Badger. You may need to do this after you restart your computer
