@@ -150,6 +150,14 @@ class Puller(object):
             page.fill('#username', hein_username)
             page.fill('#password', hein_password)
             page.click('input[type="submit"]')
+            # Handle Duo push logins that happen inside the duo iframe
+            page.wait_for_selector('#duo_iframe')
+            frame = page.frame(name='duo_iframe')
+            duo_push_selector = 'button:has-text("Push")'
+            button = frame.wait_for_selector(duo_push_selector, timeout=10 * 1000)
+            # Click the Duo "Send Me a Push" button if it is enabled
+            if button.is_enabled():
+                frame.click(duo_push_selector)
             page.wait_for_selector('#citation_tab', timeout=60 * 1000)
         except Exception:
             raise Exception('Failed to log in to Hein.')
