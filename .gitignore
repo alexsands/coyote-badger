@@ -2,8 +2,6 @@
 projects/*
 !projects/Example/*
 !projects/.gitkeep
-coyote_badger/usr/*
-!coyote_badger/usr/.gitkeep
 
 ###Python###
 
