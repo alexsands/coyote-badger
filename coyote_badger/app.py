@@ -26,6 +26,7 @@ Bootstrap(app)
 
 citations = None
 puller = Puller()
+puller.clear_user_data()
 
 
 def SuccessResponse(message=None):

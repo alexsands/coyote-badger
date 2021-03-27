@@ -13,7 +13,7 @@
 
 ## Getting Started
 Coyote Badger is designed to take a spreadsheet of accurately bluebooked
-citations and search for them. Basically, it opens and controls a Chrome
+citations and search for them. Basically, it opens and controls a web
 browser in the background to do what an editor would be doing manually.
 
 When it runs, it will pull the sources for a particular project, and output
@@ -122,13 +122,25 @@ The project is generally structured as follows:
    that's where all the scraping logic happens.
 
 To make it easier to see what is happening with Playwright, you can
-uncomment the `slow_mo` argument in `coyote_badger.puller.Puller.context`.
+increase the `slow_mo` argument to something higher in
+`coyote_badger.puller.Puller.create_context()`.
 
 In the event Hein, Westlaw, or SSRN ever changes their website, the logic for
 actually pulling sources on the web is in `coyote_badger.puller.Puller.pull()`.
 You can also contact me directly, just open an
 [issue](https://github.com/alexsands/coyote-badger/issues), and I will get
 an email about it. I'll happily take a look and try to help.
+
+**Note:** As of 3/27/2021, it is not possible to download
+Original Image files from Westlaw due to
+[a bug in Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=761295)
+that prevents the browser from being able to load PDF content-types in
+`headless=False` mode. As a workaround, we use Firefox in `headless=False`
+mode to grab sources from Hein, Westlaw, and SSRN. Unfortunately, Playwright
+[does not support loading extensions in Firefox easily](https://github.com/microsoft/playwright/issues/2644),
+so now we have to use a mix of Chrome (to load extensions for clean website
+screenshots) and Firefox (to pull Hein, Westlaw, SSRN). Eventually, when either
+issue is resolved, the code can be simplified by just using one browser.
 
 
 ## Videos
