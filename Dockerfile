@@ -44,8 +44,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libnss3 \
     libxss1 \
     libasound2 \
-    fonts-noto-color-emoji \
-    libxtst6
+    fonts-noto-color-emoji
+# Install Firefox dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libdbus-glib-1-2 \
+    libxt6
 # Install XVFB to run browsers in headful mode
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb
