@@ -186,7 +186,7 @@ class Puller(object):
             # Click the Duo "Send Me a Push" button if it is enabled
             if duo_push_button.is_enabled():
                 duo_push_button.click()
-            page.wait_for_selector('#citation_tab', timeout=self.timeout(60))
+            page.wait_for_selector('#search_area', timeout=self.timeout(60))
         except Exception as e:
             print(str(e))
             raise Exception('Failed to log in to Hein.')
@@ -278,9 +278,9 @@ class Puller(object):
         :type search_term: str
         '''
         page.goto(self.HEIN_SEARCH_URL)
-        page.click('#citation_tab')
-        page.fill('#citation_terms', search_term)
-        page.click('#sendit:visible i')
+        search_query = 'citation:{}'.format(search_term)
+        page.fill('#full_text_terms', search_query)
+        page.click('#sendit_full_text:visible i')
         page.wait_for_selector('#page_content')
         if (page.query_selector('#page_content:has-text("No matching results")')
                 or page.query_selector('#page_content:has-text("Citation Not Found")')

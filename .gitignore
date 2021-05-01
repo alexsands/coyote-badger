@@ -1,7 +1,4 @@
 ### Files ###
-_projects/*
-!_projects/Example/*
-!_projects/.gitkeep
 coyote_badger/usr/
 
 ###Python###
