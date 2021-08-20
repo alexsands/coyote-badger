@@ -7,8 +7,9 @@
 2. [Install](#install)
 3. [Run](#run)
 4. [Development](#development)
-5. [Videos](#videos)
-6. [FAQ](#faq)
+5. [Making or Requesting Changes](#making-or-requesting-changes)
+6. [Videos](#videos)
+7. [FAQ](#faq)
 
 
 ## Getting Started
@@ -143,10 +144,21 @@ screenshots) and Firefox (to pull Hein, Westlaw, SSRN). Eventually, when either
 issue is resolved, the code can be simplified by just using one browser.
 
 
+## Making or Requesting Changes
+
+If the project stops working as expected, please open up an
+[issue](https://github.com/alexsands/coyote-badger/issues) with details on what
+is failing. I will get an email about it and happily take a look. If you're
+familiar with programming and would like to try fixing it yourself, you can
+(1) open a pull request with your fix or (2) just upload the file/changes
+you think should be made on the issue itself.
+
+
 ## Videos
 - [Starting & Stopping](https://youtu.be/Pzyfdr_b198)
 - [Creating a Source Inventory Template](https://youtu.be/p2cW8tUTOHU)
 - [Pulling Sources](https://youtu.be/ypmY4Hfn5Rg)
+
 
 ## FAQ
 **When I try to run the application, I get a message about not being
@@ -173,6 +185,21 @@ an email about it. I'll happily take a look and try to help.
 The program uses a few Chrome extensions to block ads and paywalls,
 which unfortunately do not work in headless Chrome. The Chrome team does
 not presently have this on their radar for development.
+
+
+**Why is git ignoring some files when I make changes?**
+
+The `_projects/Example` folder is being ignored so that it can be run as a
+test set, without pushing new pull results to GitHub on each commit. It's a bit
+deceiving though, because this doesn't happen in the `.gitignore` file. Instead,
+these files are ignored via:
+```sh
+git update-index --skip-worktree <file>
+```
+To show which files are ignored, run:
+```sh
+git ls-files -v . | grep ^S
+```
 
 
 **Something else?**

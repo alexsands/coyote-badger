@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 
+from urllib.parse import quote
 from urllib.request import urlretrieve
 from fake_useragent import UserAgent
 from playwright.sync_api import sync_playwright
@@ -22,7 +23,7 @@ class Puller(object):
 
     HEIN_SIGN_IN_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/Welcome'
     HEIN_AUTHED_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/Welcome'
-    HEIN_SEARCH_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/Welcome'
+    HEIN_SEARCH_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit='
     HEIN_BASE_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/'
 
     WESTLAW_SIGN_IN_URL = 'https://lawschool.westlaw.com/redirect/westlaw'
@@ -258,6 +259,8 @@ class Puller(object):
         page = self.firefox.new_page()
         try:
             page.goto(self.WESTLAW_SEARCH_URL)
+            if (page.query_selector('#coid_lightboxOverlay')):
+                page.click('.co_overlayBox_closeButton')
             page.click('#jurisdictionId')
             page.click('#co_clearSelectedJurisdictionsBtn')
             page.check('#co_state_all')
@@ -277,10 +280,7 @@ class Puller(object):
         :param search_term: The search_term to search for
         :type search_term: str
         '''
-        page.goto(self.HEIN_SEARCH_URL)
-        search_query = 'citation:{}'.format(search_term)
-        page.fill('#full_text_terms', search_query)
-        page.click('#sendit_full_text:visible i')
+        page.goto(self.HEIN_SEARCH_URL.format(quote(search_term, safe='')))
         page.wait_for_selector('#page_content')
         if (page.query_selector('#page_content:has-text("No matching results")')
                 or page.query_selector('#page_content:has-text("Citation Not Found")')
