@@ -23,7 +23,7 @@ of the sources.
 
 To get started with Coyote Badger, first follow the
 [instructions to install](#install) the software, then follow the
-[instructions to run](#run) the software. Once Coyote Badger is up an running,
+[instructions to run](#run) the software. Once Coyote Badger is up and running,
 you may find the short [tutorial videos](#videos) helpful to understand
 how it works.
 
@@ -173,11 +173,23 @@ if Docker does not start automatically.
 application isn't pulling sources properly. What do I do?**
 
 It's likely that Hein, Westlaw, or SSRN changed their website code and it
-broke the automated puller. If you are familiar with Python, you can try to
-fix this on your own with the [Development](#development) instructions.
-Otherwise, you can also contact me directly, just open an
-[issue](https://github.com/alexsands/coyote-badger/issues), and I will get
-an email about it. I'll happily take a look and try to help.
+broke the automated puller. If you are familiar with programming, you can try
+to fix this on your own with the [Development](#development) instructions and
+then make an issue/pull request on GitHub. Otherwise, please read the
+[Making or Requesting Changes](#making-or-requesting-changes) section.
+
+
+**Hein login seems to always fail because my Duo isn't working. What do I do?**
+The program works by attempting to log you in (using the username and password
+you provide) to Hein, Westlaw, and SSRN in the background. To do so, Hein
+may use Duo for two-factor authentication when you log in with your university
+or organization email address. In order for the program to pass this step, you
+must set your Duo two-factor authentication settings to use "Push Notifications"
+by default. If you use text message codes the program has no way of entering
+the pin while its running in the background (since it can't access your text
+messages). You can change this preference to use "Push Notifications" by
+default on your organization's Duo settings page. You'll also need to download
+the Duo smartphone app.
 
 
 **Why use `headless=False` with `xvfb` if you can't even see the browser?**
