@@ -87,7 +87,7 @@ def create_sources_template(doc_file):
                 continue
 
             # The case where a citation is in the format "Id. at 813"
-            if re.search('[iI][dD].? at [0-9]+', long_cite):
+            if re.search('^[iI][dD].? at [0-9]+[-–—]?[0-9]+.?$', long_cite):
                 continue
 
             # ----------------------------------------------------------
