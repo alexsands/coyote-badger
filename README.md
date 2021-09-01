@@ -161,6 +161,13 @@ you think should be made on the issue itself.
 
 
 ## FAQ
+**How do I get notified of issues, changes, or new versions of Coyote Badger?**
+
+First, create a GitHub account. Then, at the top right of the [Coyote Badger
+project page](https://github.com/alexsands/coyote-badger) click
+`Watch` → `All Activity` to receive emails about issues.
+
+
 **When I try to run the application, I get a message about not being
 able to connect to the Docker daemon. What do I do?**
 
