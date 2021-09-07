@@ -201,6 +201,14 @@ class Puller(object):
             page.fill('#Username', westlaw_username)
             page.fill('#Password', westlaw_password)
             page.click('#SignIn')
+            try:
+                # Check if the graduation message appears, solved by refresh
+                page.wait_for_selector('#grade-elite-action-btn', timeout=self.timeout(10))
+                page.goto(self.WESTLAW_SIGN_IN_URL)
+            except Exception as e:
+                # Just ignore failures because this doesn't always show
+                print(str(e))
+                pass
             page.wait_for_selector('#searchButton')
         except Exception as e:
             print(str(e))
@@ -217,9 +225,9 @@ class Puller(object):
                 # Click the "Accept all cookies" button if it appears
                 page.click('#onetrust-accept-btn-handler', timeout=self.timeout(10))
             except Exception as e:
-                print(str(e))
                 # Just ignore failures because they may remove this
                 # button and just allow normal signing in
+                print(str(e))
                 pass
             page.fill('input[name="input-email"]', ssrn_username)
             page.fill('input[name="input-pass"]', ssrn_password)
