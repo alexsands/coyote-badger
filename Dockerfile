@@ -7,7 +7,11 @@ WORKDIR /opt/coyotebadger
 # Install basics
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
-RUN apt-get install -y python3 python3-pip
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get install -y python3.8
+RUN apt-get install -y python3-pip
 
 # Install microsoft/playwright additional dependencies
 # See: https://github.com/microsoft/playwright/blob/master/utils/docker/Dockerfile.bionic
