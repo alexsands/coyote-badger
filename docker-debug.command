@@ -3,13 +3,17 @@
 cd -- "$(dirname "$0")"
 docker build \
   -t coyotebadger:latest \
-  --progress=plain \
+  --platform="linux/x86_64" \
+  --progress="plain" \
   --no-cache \
   .
 docker run \
   -it \
   --rm \
   --name coyotebadger \
+  --platform="linux/x86_64" \
+  --ipc="host" \
+  --shm-size="1gb" \
   --memory="2g" \
   --cpus="2" \
   -v "$(pwd)"/_projects:/opt/coyotebadger/_projects \

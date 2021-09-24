@@ -99,6 +99,7 @@ class Puller(object):
                 '--enable-automation',
             ],
             args=[
+                '--disable-dev-shm-usage',
                 '--no-default-browser-check',
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
