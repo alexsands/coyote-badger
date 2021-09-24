@@ -98,6 +98,7 @@ pyenv install 3.9.2
 pyenv virtualenv 3.9.2 coyote-badger
 pyenv activate coyote-badger
 pip install -r requirements.txt
+git clone --branch=v1.11.1 https://github.com/microsoft/playwright-python.git external/playwright-python-1.11.1
 pip install external/playwright-python-1.11.1
 python -m playwright install
 ```

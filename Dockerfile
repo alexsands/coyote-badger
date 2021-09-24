@@ -71,7 +71,7 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 # Install external requirements from source
-COPY external external
+RUN git clone --branch=v1.11.1 https://github.com/microsoft/playwright-python.git external/playwright-python-1.11.1
 RUN pip3 install external/playwright-python-1.11.1
 
 # For debugging
