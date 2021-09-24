@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y \
-    python3.8 \
+    python3.9 \
     python3-pip
 
 # For debugging

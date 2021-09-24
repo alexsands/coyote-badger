@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 cd -- "$(dirname "$0")"
-docker build . -t coyotebadger:latest
-docker run -it \
+docker build \
+  -t coyotebadger:latest \
+  .
+docker run \
+  -it \
   --rm \
   --name coyotebadger \
   --memory="2g" \
