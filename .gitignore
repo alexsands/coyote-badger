@@ -1,8 +1,11 @@
 ### Files ###
+
 coyote_badger/usr/
 _projects/*
 _projects/**/*
 !_projects/.gitkeep
+external
+
 
 ###Python###
 

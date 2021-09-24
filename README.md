@@ -71,7 +71,7 @@ system:
 3. Copy and paste the following into Command Prompt and press <kbd>Enter</kbd>
 ```sh
 docker build . -t coyotebadger:latest
-docker run -it --rm --name coyotebadger --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 5000:5000 coyotebadger:latest
+docker run -it --rm --name coyotebadger --ipc="host" --shm-size="1gb" --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 5000:5000 coyotebadger:latest
 ```
 4. You'll start to see it printing out information. Wait
    until you see `Running on http://0.0.0.0:5000/`. If it's your first
@@ -89,17 +89,24 @@ automated browser. To improve or debug Coyote Badger, it's easiest to run
 it directly from source with Python, instead of in the Docker container,
 because you can view the `headless=False` Chromium browser.
 
-First, create a virtual environment in the root and install the project
-dependencies with:
+First, make sure `pyenv` and `pyenv-virtualenv` are installed on your computer.
+
+Then, in the root of the project, create a virtual environment and install
+the project dependencies with:
 ```sh
-virtualenv -p python3 venv
-source venv/bin/activate
-pip3 install -r requirements.txt
+pyenv install 3.9.2
+pyenv virtualenv 3.9.2 coyote-badger
+pyenv activate coyote-badger
+pip install -r requirements.txt
+git clone --branch=v1.12.0 https://github.com/microsoft/playwright-python.git external/playwright-python-1.12.0
+pip install external/playwright-python-1.12.0
+python -m playwright install
 ```
 
-Then run the project with:
+Now (and in the future) you can run the project with:
 ```sh
-FLASK_ENV=development python3 -m coyote_badger.app
+pyenv activate coyote-badger
+FLASK_ENV=development python -m coyote_badger.app
 ```
 
 The project is generally structured as follows:
@@ -166,6 +173,18 @@ you think should be made on the issue itself.
 First, create a GitHub account. Then, at the top right of the [Coyote Badger
 project page](https://github.com/alexsands/coyote-badger) click
 `Watch` → `All Activity` to receive emails about issues.
+
+
+**How do I run Coyote Badger on a Mac with Apple Silicon?**
+
+As of right now, you can use the normal [Mac running instructions](#mac) if
+all you need to do is run the Coverter to generate a `Sources.xlsx` file. If
+you also need to pull sources, you will have to use the
+[Development instructions](#development) and run Coyote Badger in the
+foreground. There is an
+[open issue](https://github.com/alexsands/coyote-badger/issues/6) in place
+to track the progress of fully running Coyote Badger in Docker on Apple Silicon
+and this will be possible in a future version.
 
 
 **When I try to run the application, I get a message about not being

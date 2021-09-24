@@ -1,6 +1,8 @@
 import os
 
-from pikepdf import Pdf
+from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfFileWriter
 from PIL import Image
 from string import printable
 from sanitize_filename import sanitize
@@ -30,11 +32,11 @@ def merge(paths, save_as_path):
     :param save_as_path: The filename to save the result as
     :type save_as_path: str
     '''
-    result = Pdf.new()
+    merger = PdfFileMerger()
     for path in paths:
-        with Pdf.open(path) as src:
-            result.pages.extend(src.pages)
-    result.save(save_as_path)
+        merger.append(path)
+    merger.write(save_as_path)
+    merger.close()
 
 
 def remove_first_page(path):
@@ -43,9 +45,13 @@ def remove_first_page(path):
     :param path: The filepath of the PDF
     :type path: str
     '''
-    with Pdf.open(path, allow_overwriting_input=True) as src:
-        src.pages.remove(p=1)
-        src.save(path)
+    infile = PdfFileReader(path, 'rb')
+    output = PdfFileWriter()
+    for i in range(1, infile.getNumPages()):
+        p = infile.getPage(i)
+        output.addPage(p)
+    with open(path, 'wb') as f:
+        output.write(f)
 
 
 def clean_string(string):

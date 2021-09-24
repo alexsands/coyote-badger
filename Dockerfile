@@ -3,15 +3,7 @@ FROM ubuntu:20.04
 # Setup working directory
 RUN mkdir -p /opt/coyotebadger
 WORKDIR /opt/coyotebadger
-
-# Install basics
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt-get update
-RUN apt-get install -y python3.8
-RUN apt-get install -y python3-pip
 
 # Install microsoft/playwright additional dependencies
 # See: https://github.com/microsoft/playwright/blob/master/utils/docker/Dockerfile.bionic
@@ -57,11 +49,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb
 
-# Install package requirements
+# Install items for external/playwright-python
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    unzip
+
+# Install python and pip
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt-get update && apt-get install -y \
+    python3.9 \
+    python3-pip
+
+# For debugging
+RUN python3 --version
+RUN pip3 --version
+
+# Install package requirements from PyPI
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-# Install Playwright Chrome
+# Install external requirements from source
+RUN git clone --branch=v1.12.0 https://github.com/microsoft/playwright-python.git external/playwright-python-1.12.0
+RUN pip3 install external/playwright-python-1.12.0
+
+# For debugging
+RUN pip3 freeze
+
+# Install playwright browsers
 RUN python3 -m playwright install
 
 # Add source files

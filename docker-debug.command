@@ -4,6 +4,8 @@ cd -- "$(dirname "$0")"
 docker build \
   -t coyotebadger:latest \
   --platform="linux/x86_64" \
+  --progress="plain" \
+  --no-cache \
   .
 docker run \
   -it \
