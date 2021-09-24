@@ -89,17 +89,23 @@ automated browser. To improve or debug Coyote Badger, it's easiest to run
 it directly from source with Python, instead of in the Docker container,
 because you can view the `headless=False` Chromium browser.
 
-First, create a virtual environment in the root and install the project
-dependencies with:
+First, make sure `pyenv` and `pyenv-virtualenv` are installed on your computer.
+
+Then, in the root of the project, create a virtual environment and install
+the project dependencies with:
 ```sh
-virtualenv -p python3 venv
-source venv/bin/activate
-pip3 install -r requirements.txt
+pyenv install 3.9.2
+pyenv virtualenv 3.9.2 coyote-badger
+pyenv activate coyote-badger
+pip install -r requirements.txt
+pip install external/playwright-python-1.11.1
+python -m playwright install
 ```
 
-Then run the project with:
+Now (and in the future) you can run the project with:
 ```sh
-FLASK_ENV=development python3 -m coyote_badger.app
+pyenv activate coyote-badger
+FLASK_ENV=development python -m coyote_badger.app
 ```
 
 The project is generally structured as follows:

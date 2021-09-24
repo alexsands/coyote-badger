@@ -21,10 +21,10 @@ class Puller(object):
 
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
 
-    HEIN_SIGN_IN_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/Welcome'
-    HEIN_AUTHED_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/Welcome'
-    HEIN_SEARCH_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit='
-    HEIN_BASE_URL = 'https://heinonline-org.ezproxy.lib.utexas.edu/HOL/'
+    HEIN_SIGN_IN_URL = 'https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome'
+    HEIN_AUTHED_URL = 'https://heinonline.org/HOL/Welcome'
+    HEIN_SEARCH_URL = 'https://heinonline.org/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit='
+    HEIN_BASE_URL = 'https://heinonline.org/HOL/'
 
     WESTLAW_SIGN_IN_URL = 'https://lawschool.westlaw.com/redirect/westlaw'
     WESTLAW_AUTHED_URL = 'https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)'
@@ -312,7 +312,7 @@ class Puller(object):
         page.fill('#searchInputId', search_term)
         page.click('#searchButton')
         try:
-            page.wait_for_selector('#co_docHeader #title', timeout=self.timeout(10))
+            page.wait_for_selector('#co_docHeader #title', timeout=self.timeout(20))
         except Exception as e:
             print(str(e))
             raise NotFoundError

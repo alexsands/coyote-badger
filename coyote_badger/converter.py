@@ -33,13 +33,6 @@ def create_sources_template(doc_file):
         if footnote.startswith('footnote'):
             continue
 
-        # Ignore starting footnotes about the author (usually start
-        # with an asterisk) and other extraneous footnotes. Proper
-        # footnotes should start with an "." because docx2python
-        # strips the number
-        if not footnote.startswith('.'):
-            continue
-
         # Now we are looking at actual citation footnotes
         footnote_count += 1
         clean_footnote = footnote.strip('.')  # remove leading/trailing "."
