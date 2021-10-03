@@ -6,6 +6,7 @@ from urllib.parse import quote
 from urllib.request import urlretrieve
 from fake_useragent import UserAgent
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from coyote_badger import utils
 from coyote_badger.config import PACKAGE_FOLDER
@@ -338,8 +339,17 @@ class Puller(object):
         new_page = self.firefox.new_page()
         try:
             a_href = a_tag.get_attribute('href')
-            with new_page.expect_download(timeout=self.timeout(20)) as download_info:
-                new_page.goto(self.HEIN_BASE_URL + a_href)
+            try:
+                with new_page.expect_download(timeout=self.timeout(15)) as download_info:
+                    new_page.goto(self.HEIN_BASE_URL + a_href)
+            except PlaywrightTimeoutError as e:
+                # A timeout might indicate that the warning about too many
+                # downloads recently on this user session is visible.
+                # Click on the "I understand, please proceed" button if so
+                btn_selector = '#verify_human'
+                if (new_page.query_selector(btn_selector)):
+                    with new_page.expect_download(timeout=self.timeout(15)) as download_info:
+                        new_page.click(btn_selector, timeout=self.timeout(10))
             download = download_info.value
             download_path = project.save_pull_path(filename, 'pdf')
             download.save_as(download_path)
@@ -549,6 +559,8 @@ class Puller(object):
                 article_path = self._hein_download(
                     article_print_a, project,
                     '{}-article'.format(source.filename))
+                if not article_path:
+                    raise Exception('Error while downloading journal article')
                 # ------------------------------------------------------
                 # Get the first Table of Contents
                 # ------------------------------------------------------

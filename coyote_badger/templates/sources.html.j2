@@ -25,6 +25,7 @@
       /**
        * Getters for row data, which may changed/added to
        */
+      const getStartAt = () => $('#starting-source');
       const getRows = () => $('#sources tbody tr');
       const getRow = (index) => getRows()[index];
 
@@ -145,13 +146,15 @@
 
       pullSourcesButton.on('click', async function(e) {
         e.preventDefault();
-        $(this).prop('disabled', true)
+        const startAt = getStartAt();
+        startAt.prop('disabled', true);
+        $(this).prop('disabled', true);
         $(this).button('saving');
         await saveSources();
         $(this).button('checking');
         if (!await isLoggedIn()) return;
         $(this).button('loading');
-        const rows = getRows();
+        const rows = getRows().slice(startAt.val() - 1);
         for (const row of rows) {
           incrementRequestsInProgress();
         }
@@ -160,6 +163,7 @@
         }
         $(this).button('reset');
         $(this).prop('disabled', false)
+        startAt.prop('disabled', false);
       });
 
       saveSourcesButton.on('click', async function(e) {
@@ -183,26 +187,45 @@
 
     <p>
       <div class="btn-toolbar" role="toolbar">
-        <button
-          id="pull-sources"
-          type="button"
-          class="btn btn-success"
-          data-saving-text="Saving changes..."
-          data-checking-text="Checking login..."
-          data-loading-text="Pulling..."
-        >
-          Start Pulling
-          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-        </button>
-        <button
-          id="save-sources"
-          type="button"
-          class="btn btn-default pull-right"
-          data-loading-text="Saving..."
-        >
-          Save Changes
-          <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
-        </button>
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="input-group" style="width: 225px">
+              <span class="input-group-btn">
+                <button
+                  id="pull-sources"
+                  type="button"
+                  class="btn btn-success"
+                  data-saving-text="Saving changes..."
+                  data-checking-text="Checking login..."
+                  data-loading-text="Pulling..."
+                >
+                  <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                  Start pulling from:
+                </button>
+              </span>
+              <input
+                id="starting-source"
+                type="number"
+                class="form-control"
+                placeholder="Start at..."
+                value="1"
+                min="1"
+                max="{{ sources|length }}"
+              >
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <button
+              id="save-sources"
+              type="button"
+              class="btn btn-default pull-right"
+              data-loading-text="Saving..."
+            >
+              <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+              Save changes
+            </button>
+          </div>
+        </div>
       </div>
     </p>
 

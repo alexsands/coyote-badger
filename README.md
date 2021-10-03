@@ -168,14 +168,14 @@ you think should be made on the issue itself.
 
 
 ## FAQ
-**How do I get notified of issues, changes, or new versions of Coyote Badger?**
+#### How do I get notified of issues, changes, or new versions of Coyote Badger?
 
 First, create a GitHub account. Then, at the top right of the [Coyote Badger
 project page](https://github.com/alexsands/coyote-badger) click
 `Watch` → `All Activity` to receive emails about issues.
 
 
-**How do I run Coyote Badger on a Mac with Apple Silicon?**
+#### How do I run Coyote Badger on a Mac with Apple Silicon?
 
 As of right now, you can use the normal [Mac running instructions](#mac) if
 all you need to do is run the Coverter to generate a `Sources.xlsx` file. If
@@ -187,16 +187,26 @@ to track the progress of fully running Coyote Badger in Docker on Apple Silicon
 and this will be possible in a future version.
 
 
-**When I try to run the application, I get a message about not being
-able to connect to the Docker daemon. What do I do?**
+#### When I try to run the application, I get a message about not being able to connect to the Docker daemon. What do I do?
 
 Make sure you open the Docker application and click Start before trying
 to run Coyote Badger. You may need to do this after you restart your computer
 if Docker does not start automatically.
 
 
-**Everything is installed, it's running, but the actual Coyote Badger
-application isn't pulling sources properly. What do I do?**
+#### Docker is taking up a lot of space on my computer. What should I do?
+
+Open Terminal or Command Prompt on your computer and type:
+```sh
+docker system prune -a -f
+```
+This will remove all unused Docker images (not just dangling ones), and when it
+is finished it will show you the amount of reclaimed space. Next time you run
+Coyote Badger, you will have to wait for all the Dockerfile steps to complete
+again.
+
+
+#### Everything is installed, it's running, but the actual Coyote Badger application isn't pulling sources properly. What do I do?
 
 It's likely that Hein, Westlaw, or SSRN changed their website code and it
 broke the automated puller. If you are familiar with programming, you can try
@@ -205,7 +215,7 @@ then make an issue/pull request on GitHub. Otherwise, please read the
 [Making or Requesting Changes](#making-or-requesting-changes) section.
 
 
-**Hein login seems to always fail because my Duo isn't working. What do I do?**
+#### Hein login seems to always fail because my Duo isn't working. What do I do?
 The program works by attempting to log you in (using the username and password
 you provide) to Hein, Westlaw, and SSRN in the background. To do so, Hein
 may use Duo for two-factor authentication when you log in with your university
@@ -218,14 +228,25 @@ default on your organization's Duo settings page. You'll also need to download
 the Duo smartphone app.
 
 
-**Why use `headless=False` with `xvfb` if you can't even see the browser?**
+#### My HeinOnline account was deactivated because of dowload activity. What should I do?
+
+While we've never had this happen to date, it's possible that Hein could
+deactivate your account if it suspects unusual behavior (downloading a lot
+of sources automatically). There is a human detection page that Coyote Badger
+automatically clicks through to verify you're a human, but if you need to
+contact Hein, the support information shown on this page is:
+- [holsupport@wshein.com](mailto:holsupport@wshein.com)
+- 800-277-6995 (phone support is available Monday - Friday 8:30am - 6:00pm ET)
+
+
+#### Why use `headless=False` with `xvfb` if you can't even see the browser?
 
 The program uses a few Chrome extensions to block ads and paywalls,
 which unfortunately do not work in headless Chrome. The Chrome team does
 not presently have this on their radar for development.
 
 
-**Why is git ignoring some files when I make changes?**
+#### Why is git ignoring some files when I make changes?
 
 The `_projects/Example` folder is being ignored so that it can be run as a
 test set, without pushing new pull results to GitHub on each commit. It's a bit
@@ -240,7 +261,7 @@ git ls-files -v . | grep ^S
 ```
 
 
-**Something else?**
+#### Something else?
 
 Open up an [issue](https://github.com/alexsands/coyote-badger/issues) with your
 question, and I will get an email about it. I'll happily take a look and try
