@@ -24,6 +24,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 Bootstrap(app)
 
+PORT = 3000
 citations = None
 puller = Puller()
 puller.clear_user_data()
@@ -266,4 +267,5 @@ def pull():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000, threaded=False)
+    app.run(host='0.0.0.0', port=PORT, threaded=False)
+    print('Coyote Badger is ready to use! Open your browser to "localhost:{}"'.format(PORT))

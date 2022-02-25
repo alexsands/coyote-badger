@@ -115,14 +115,11 @@ if (matchDomain('elmercurio.com')) {
     readMore.click();
   }
 } else if (matchDomain('mexiconewsdaily.com')) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const sideNotification = document.querySelector('.pigeon-widget-prompt');
-    const subMessage = document.querySelector('.sub_message_container');
-    const popup = document.querySelector('.popupally-pro-outer-full-width-7-fluid_qemskqa');
-    const bgFocusRemoverId = document.getElementById('popup-box-pro-gfcr-7');
-
-    removeDOMElement(sideNotification, subMessage, popup, bgFocusRemoverId);
-  });
+  window.setTimeout(function () {
+    const popup = document.querySelector('div.pigeon-widget-prompt');
+    const cproOverlay = document.querySelector('.cpro-overlay');
+    removeDOMElement(popup, cproOverlay);
+  }, 500); // Delay (in milliseconds)
 } else if (matchDomain('the-american-interest.com')) {
   const counter = document.getElementById('article-counter');
   removeDOMElement(counter);
@@ -266,8 +263,10 @@ if (matchDomain('elmercurio.com')) {
   const counter = document.querySelector('.full.hidden-print.popup-msg');
   removeDOMElement(counter);
 } else if (matchDomain('ft.com')) {
-  const cookieBanner = document.querySelectorAll('div[class*="cookie-message"]');
-  removeDOMElement(cookieBanner);
+  const cookieBanner = document.querySelector('.o-banner__outer');
+  const ribbon = document.querySelector('.js-article-ribbon');
+  const ads = document.querySelector('.o-ads');
+  removeDOMElement(cookieBanner, ads, ribbon);
 } else if (matchDomain('thehindu.com')) {
   document.addEventListener('DOMContentLoaded', () => {
     const counter = document.querySelector('#test');
@@ -497,8 +496,8 @@ if (matchDomain('elmercurio.com')) {
   removeDOMElement(paywall);
 } else if (matchDomain('delfi.ee')) {
   // Remove 'adblocker-detected' notification overlay
-  document.body.classList.remove('adb-curtain');
-  const el = document.getElementById('ab--notification-header');
+  document.body.classList.remove('U-overflow-hidden');
+  const el = document.getElementsByClassName('C-ad-block-layer')[0];
   removeDOMElement(el);
 } else if (matchDomain(['postimees.ee', 'elu24.ee'])) {
   setTimeout(function () {
@@ -590,6 +589,40 @@ if (matchDomain('elmercurio.com')) {
     }
     const advertising = document.querySelectorAll('.advertising, amp-embed');
     removeDOMElement(...advertising);
+  }
+} else if (matchDomain('speld.nl')) {
+  const paywallPopup = document.querySelector('.c-paywall-notice');
+  removeDOMElement(paywallPopup);
+} else if (matchDomain('lastampa.it')) {
+  const url = window.location.href;
+  if (!url.includes('/amp/')) {
+    const premium = document.querySelector('.paywall-adagio');
+    removeDOMElement(premium);
+    window.setTimeout(function () {
+      if (premium) {
+        window.location.href = url.split('?')[0] + '/amp/';
+      }
+      const articleBody = document.querySelector('div#article-body[style]');
+      if (articleBody) {
+        articleBody.removeAttribute('style');
+      }
+    }, 500);
+  } else {
+    const paywall = document.querySelector('div[id^="paywall-banner"]');
+    removeDOMElement(paywall);
+    const subscriptionSection = document.querySelector('[subscriptions-section="content"]');
+    if (subscriptionSection) {
+      subscriptionSection.removeAttribute('subscriptions-section');
+      const preview = document.querySelector('div[subscriptions-section="content-not-granted"]');
+      removeDOMElement(preview);
+    }
+    const ampAds = document.querySelectorAll('amp-ad, amp-embed');
+    removeDOMElement(...ampAds);
+  }
+} else if (matchDomain('time.com')) {
+  const body = document.querySelector('body');
+  if (body) {
+    body.setAttribute('style', 'position:relative !important;');
   }
 }
 

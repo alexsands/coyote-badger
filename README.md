@@ -46,7 +46,7 @@ To install Coyote Badger:
 To run Coyote Badger, follow the instructions for your particular operating
 system:
 
-#### Mac
+#### Mac (Intel or Apple Silicon)
 1. Make sure Docker is started on your computer
 2. Navigate to your Coyote Badger folder
 3. Right click on the `_start-mac.command` file, then select "Open". Accept

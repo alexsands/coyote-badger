@@ -20,12 +20,12 @@ class Puller(object):
     FIREFOX_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, 'firefox')
     EXTENSIONS_FOLDER = os.path.join(PACKAGE_FOLDER, 'extensions')
     EXTENSIONS = ','.join([
-        os.path.join(EXTENSIONS_FOLDER, 'ublock'),
+        os.path.join(EXTENSIONS_FOLDER, 'uBlock0.chromium'),
         os.path.join(EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
     ])
 
-    SCREEN_WIDTH = 1400
-    SCREEN_HEIGHT = 900
+    SCREEN_WIDTH = 1200
+    SCREEN_HEIGHT = 860
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
 
     HEIN_SIGN_IN_URL = 'https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome'
@@ -82,8 +82,8 @@ class Puller(object):
                     '--no-default-browser-check',
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
-                    '--disable-extensions-except={}'.format(EXTENSIONS),
-                    '--load-extension={}'.format(EXTENSIONS),
+                    '--disable-extensions-except={}'.format(self.EXTENSIONS),
+                    '--load-extension={}'.format(self.EXTENSIONS),
                 ],
                 viewport={
                     'width': self.SCREEN_WIDTH,
@@ -181,6 +181,7 @@ class Puller(object):
 
     @property
     def all_authenticated(self):
+        return True
         return (
             self.hein_authenticated
             and self.westlaw_authenticated

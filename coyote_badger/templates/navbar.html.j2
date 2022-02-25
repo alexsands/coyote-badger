@@ -21,15 +21,11 @@
         </ul>
 
         <ul class="nav navbar-nav navbar-right">
-          {% for route, name in [('login', 'Login')] %}
-            <li
-              {% if request.path == url_for(route) %} class="active" {% endif %}
-            >
-              <a href="{{ url_for(route) }}">
-                {{ name }}
-              </a>
-            </li>
-          {% endfor %}
+          <li>
+            <a target="_blank" href="http://localhost:3001">
+              Viewer
+            </a>
+          </li>
         </ul>
       </div>
     </div>
