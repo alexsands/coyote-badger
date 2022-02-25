@@ -53,11 +53,11 @@ system:
    the warning about the unidentified developer if it asks (you should only
    have to do this step once).
 4. A Terminal window will open and you'll see it printing out information. Wait
-   until you see `Running on http://0.0.0.0:5000/`.
+   until you see `Running on http://0.0.0.0:3000/`.
    Once you see this, you can close the Terminal window. If it's your first
    time running, a lot of stuff will install and this will take
    several minutes (but you shouldn't have to wait this long again!).
-5. Open your browser and go to [http://localhost:5000](http://localhost:5000)
+5. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 6. You should see Coyote Badger!
 7. When you're done using the program, right click on the `_stop-mac.command`
    file in the Coyote Badger folder, then select "Open". Accept
@@ -71,13 +71,13 @@ system:
 3. Copy and paste the following into Command Prompt and press <kbd>Enter</kbd>
 ```sh
 docker build . -t coyotebadger:latest
-docker run -it --rm --name coyotebadger --ipc="host" --shm-size="1gb" --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 5000:5000 coyotebadger:latest
+docker run -it --rm --name coyotebadger --ipc="host" --shm-size="1gb" --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 3000:3000 coyotebadger:latest
 ```
 4. You'll start to see it printing out information. Wait
-   until you see `Running on http://0.0.0.0:5000/`. If it's your first
+   until you see `Running on http://0.0.0.0:3000/`. If it's your first
    time running, a lot of stuff will install and this will take
    several minutes (but you shouldn't have to wait this long again!).
-5. Open your browser and go to [http://localhost:5000](http://localhost:5000)
+5. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 6. You should see Coyote Badger!
 7. When you're done using the program, go back to the Command Prompt that was
    running and press <kbd>Ctrl</kbd> + <kbd>C</kbd>.
@@ -97,10 +97,9 @@ the project dependencies with:
 pyenv install 3.9.2
 pyenv virtualenv 3.9.2 coyote-badger
 pyenv activate coyote-badger
+pip install --upgrade pip==22.0.3
 pip install -r requirements.txt
-git clone --branch=v1.12.0 https://github.com/microsoft/playwright-python.git external/playwright-python-1.12.0
-pip install external/playwright-python-1.12.0
-python -m playwright install
+playwright install
 ```
 
 Now (and in the future) you can run the project with:

@@ -17,5 +17,5 @@ docker run \
   --memory="2g" \
   --cpus="2" \
   -v "$(pwd)"/_projects:/opt/coyotebadger/_projects \
-  -p 5000:5000 \
+  -p 3000:3000 \
   coyotebadger:latest

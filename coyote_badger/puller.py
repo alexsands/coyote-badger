@@ -19,7 +19,13 @@ class Puller(object):
     CHROME_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, 'chrome')
     FIREFOX_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, 'firefox')
     EXTENSIONS_FOLDER = os.path.join(PACKAGE_FOLDER, 'extensions')
+    EXTENSIONS = ','.join([
+        os.path.join(EXTENSIONS_FOLDER, 'ublock'),
+        os.path.join(EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
+    ])
 
+    SCREEN_WIDTH = 1400
+    SCREEN_HEIGHT = 900
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
 
     HEIN_SIGN_IN_URL = 'https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome'
@@ -61,9 +67,28 @@ class Puller(object):
             if os.path.exists(self.CHROME_USER_DATA_DIR):
                 shutil.rmtree(self.CHROME_USER_DATA_DIR)
             os.mkdir(self.CHROME_USER_DATA_DIR)
-            self._chrome = self.create_context(
-                self.playwright.chromium, self.CHROME_USER_DATA_DIR,
-                self.ua_chrome)
+            self._chrome = self.playwright.chromium.launch_persistent_context(
+                self.CHROME_USER_DATA_DIR,
+                headless=False,
+                slow_mo=self.SLOW_MO,
+                accept_downloads=True,
+                user_agent=self.ua_chrome,
+                chromium_sandbox=False,
+                ignore_default_args=[
+                    '--enable-automation',
+                ],
+                args=[
+                    '--disable-dev-shm-usage',
+                    '--no-default-browser-check',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-extensions-except={}'.format(EXTENSIONS),
+                    '--load-extension={}'.format(EXTENSIONS),
+                ],
+                viewport={
+                    'width': self.SCREEN_WIDTH,
+                    'height': self.SCREEN_HEIGHT,
+                })
         return self._chrome
 
     @property
@@ -72,9 +97,26 @@ class Puller(object):
             if os.path.exists(self.FIREFOX_USER_DATA_DIR):
                 shutil.rmtree(self.FIREFOX_USER_DATA_DIR)
             os.mkdir(self.FIREFOX_USER_DATA_DIR)
-            self._firefox = self.create_context(
-                self.playwright.firefox, self.FIREFOX_USER_DATA_DIR,
-                self.ua_firefox)
+            self._firefox = self.playwright.firefox.launch_persistent_context(
+                self.FIREFOX_USER_DATA_DIR,
+                headless=False,
+                slow_mo=self.SLOW_MO,
+                accept_downloads=True,
+                user_agent=self.ua_firefox,
+                chromium_sandbox=False,
+                ignore_default_args=[
+                    '--enable-automation',
+                ],
+                args=[
+                    '--disable-dev-shm-usage',
+                    '--no-default-browser-check',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                ],
+                viewport={
+                    'width': self.SCREEN_WIDTH,
+                    'height': self.SCREEN_HEIGHT,
+                })
         return self._firefox
 
     @classmethod
@@ -82,35 +124,6 @@ class Puller(object):
         if os.path.exists(cls.BROWSER_USER_DATA_DIR):
             shutil.rmtree(cls.BROWSER_USER_DATA_DIR)
         os.mkdir(cls.BROWSER_USER_DATA_DIR)
-
-    @classmethod
-    def create_context(cls, browser, usr_dir, user_agent):
-        extensions = ','.join([
-            os.path.join(cls.EXTENSIONS_FOLDER, 'ublock'),
-            os.path.join(cls.EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
-        ])
-        return browser.launch_persistent_context(
-            usr_dir,
-            headless=False,
-            slow_mo=cls.SLOW_MO,
-            accept_downloads=True,
-            user_agent=user_agent,
-            chromium_sandbox=False,
-            ignore_default_args=[
-                '--enable-automation',
-            ],
-            args=[
-                '--disable-dev-shm-usage',
-                '--no-default-browser-check',
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-extensions-except={}'.format(extensions),
-                '--load-extension={}'.format(extensions),
-            ],
-            viewport={
-                'width': 1280,
-                'height': 780,
-            })
 
     @classmethod
     def timeout(cls, sec):
@@ -311,13 +324,14 @@ class Puller(object):
         :type search_term: str
         '''
         page.goto(url)
+        page.wait_for_selector('#searchInputId', timeout=self.timeout(20))
         page.fill('#searchInputId', search_term)
         page.click('#searchButton')
-        try:
-            page.wait_for_selector('#co_docHeader #title', timeout=self.timeout(20))
-        except Exception as e:
-            print(str(e))
-            raise NotFoundError
+        for i in range(20):
+            page.wait_for_timeout(self.timeout(1))
+            if page.query_selector('#co_docHeader #title'):
+                return
+        raise NotFoundError
 
     def _hein_download(self, a_tag, project, filename):
         '''Downloads a Hein source.
@@ -404,7 +418,8 @@ class Puller(object):
             download.path()
         # ...if it does not, use the download button
         else:
-            page.click('#deliveryLink1')
+            page.click('#deliveryDropButton1')
+            page.click('#deliveryRow1Download')
             # Set the download preferences
             page.click('#co_deliveryOptionsTab1')
             page.select_option('#co_delivery_format_fulltext', value='Pdf')
