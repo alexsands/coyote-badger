@@ -49,65 +49,74 @@ system:
 #### Mac (Intel or Apple Silicon)
 1. Make sure Docker is started on your computer
 2. Navigate to your Coyote Badger folder
-3. Right click on the `_start-mac.command` file, then select "Open". Accept
-   the warning about the unidentified developer if it asks (you should only
-   have to do this step once).
+3. Right click on the `__MAC-START.command` file, then select "Open".
+   Accept the warning about the unidentified developer if it asks (you
+   should only have to do this step once).
 4. A Terminal window will open and you'll see it printing out information. Wait
-   until you see `Running on http://0.0.0.0:3000/`.
+   until you see the "Coyote Badger is ready to use!" message.
    Once you see this, you can close the Terminal window. If it's your first
-   time running, a lot of stuff will install and this will take
+   time running Coyote Badger, a lot of stuff will install and this will take
    several minutes (but you shouldn't have to wait this long again!).
 5. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 6. You should see Coyote Badger!
-7. When you're done using the program, right click on the `_stop-mac.command`
-   file in the Coyote Badger folder, then select "Open". Accept
-   the warning about the unidentified developer if it asks (you should only
-   have to do this step once).
+7. When you're done using the program, right click on the
+   `__MAC-STOP.command` file in the Coyote Badger folder, then select "Open".
+   Accept the warning about the unidentified developer if it asks (you
+   should only have to do this step once).
 
 #### Windows
-1. Navigate to your Coyote Badger folder
-2. While holding <kbd>Shift</kbd>, right-click anywhere in the folder window
-   and select "Open command window here"
-3. Copy and paste the following into Command Prompt and press <kbd>Enter</kbd>
-```sh
-docker build . -t coyotebadger:latest
-docker run -it --rm --name coyotebadger --ipc="host" --shm-size="1gb" --memory="2g" --cpus="2" -v %cd%/_projects:/opt/coyotebadger/_projects -p 3000:3000 coyotebadger:latest
-```
-4. You'll start to see it printing out information. Wait
-   until you see `Running on http://0.0.0.0:3000/`. If it's your first
-   time running, a lot of stuff will install and this will take
+1. Make sure Docker is started on your computer
+2. Navigate to your Coyote Badger folder
+3. Right click on the `__WINDOWS-START.command` file, then select "Open".
+   Accept the warning about the unidentified developer if it asks (you
+   should only have to do this step once).
+4. A Terminal window will open and you'll see it printing out information. Wait
+   until you see the "Coyote Badger is ready to use!" message.
+   Once you see this, you can close the Terminal window. If it's your first
+   time running Coyote Badger, a lot of stuff will install and this will take
    several minutes (but you shouldn't have to wait this long again!).
 5. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 6. You should see Coyote Badger!
-7. When you're done using the program, go back to the Command Prompt that was
-   running and press <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+7. When you're done using the program, right click on the
+   `__WINDOWS-STOP.command` file in the Coyote Badger folder, then select "Open".
+   Accept the warning about the unidentified developer if it asks (you
+   should only have to do this step once).
 
 
 ## Development
 Coyote Badger uses Flask as the web server and Microsoft Playwright as the
-automated browser. To improve or debug Coyote Badger, it's easiest to run
-it directly from source with Python, instead of in the Docker container,
-because you can view the `headless=False` Chromium browser.
+automated browser controler.
 
-First, make sure `pyenv` and `pyenv-virtualenv` are installed on your computer.
+### Running from Source in Docker
+1. Follow the [Run](#run) instructions
+2. On the Viewer page you can add `/vnc.html?view_only=false` to the end of
+the URL to allow you to interact with the browser, like so:
+[http://localhost:3001/vnc.html?view_only=false](http://localhost:3001/vnc.html?view_only=false)
 
-Then, in the root of the project, create a virtual environment and install
-the project dependencies with:
+### Running from Source in Python
+Sometimes it can be easier to run Coyote Badger directly from source with
+Python. To do so:
+1. Make sure `pyenv` and `pyenv-virtualenv` are installed on your computer.
+2. Create a virtual environment using python@3.9.2:
 ```sh
 pyenv install 3.9.2
 pyenv virtualenv 3.9.2 coyote-badger
 pyenv activate coyote-badger
 pip install --upgrade pip==22.0.3
-pip install -r requirements.txt
-playwright install
 ```
-
-Now (and in the future) you can run the project with:
+3. Inside the project root install the project dependencies with:
+```sh
+pip install -r requirements.txt
+playwright install chromium firefox
+playwright install-deps chromium firefox
+```
+4. Now (and in the future) you can run the project with:
 ```sh
 pyenv activate coyote-badger
 FLASK_ENV=development python -m coyote_badger.app
 ```
 
+### Project Structure
 The project is generally structured as follows:
 1. `/_projects`: holds the project data and is mounted to the Docker container
    as a volume.
@@ -174,18 +183,6 @@ project page](https://github.com/alexsands/coyote-badger) click
 `Watch` → `All Activity` to receive emails about issues.
 
 
-#### How do I run Coyote Badger on a Mac with Apple Silicon?
-
-As of right now, you can use the normal [Mac running instructions](#mac) if
-all you need to do is run the Coverter to generate a `Sources.xlsx` file. If
-you also need to pull sources, you will have to use the
-[Development instructions](#development) and run Coyote Badger in the
-foreground. There is an
-[open issue](https://github.com/alexsands/coyote-badger/issues/6) in place
-to track the progress of fully running Coyote Badger in Docker on Apple Silicon
-and this will be possible in a future version.
-
-
 #### When I try to run the application, I get a message about not being able to connect to the Docker daemon. What do I do?
 
 Make sure you open the Docker application and click Start before trying
@@ -205,6 +202,22 @@ Coyote Badger, you will have to wait for all the Dockerfile steps to complete
 again.
 
 
+#### Coyote Badger is suddenly failing on a specific type of source. What do I do?
+
+First, try to figure out why it's failing by opening the [Viewer](http://localhost:3001)
+while Coyote Badger is running. Is there an unexpected page? What about a change
+to the way Hein or Westlaw look?
+
+If it's something you could fix by manually clicking on the page, you can
+add `/vnc.html?view_only=false` to the end of the Viewer URL like so:
+[http://localhost:3001/vnc.html?view_only=false](http://localhost:3001/vnc.html?view_only=false).
+Then, simply click on the browser in the Viewer whenever you need to (only
+do this if you are sure of what you're doing!).
+
+If it's not something you could fix easily, open up an
+[issue](https://github.com/alexsands/coyote-badger/issues).
+
+
 #### Everything is installed, it's running, but the actual Coyote Badger application isn't pulling sources properly. What do I do?
 
 It's likely that Hein, Westlaw, or SSRN changed their website code and it
@@ -215,6 +228,7 @@ then make an issue/pull request on GitHub. Otherwise, please read the
 
 
 #### Hein login seems to always fail because my Duo isn't working. What do I do?
+
 The program works by attempting to log you in (using the username and password
 you provide) to Hein, Westlaw, and SSRN in the background. To do so, Hein
 may use Duo for two-factor authentication when you log in with your university

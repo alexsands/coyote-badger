@@ -4,7 +4,6 @@ import shutil
 
 from urllib.parse import quote
 from urllib.request import urlretrieve
-from fake_useragent import UserAgent
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
@@ -47,10 +46,19 @@ class Puller(object):
 
         Puller stores the browsers that will be used to pull sources,
         and contains the logic for scraping the websites.
+
+        Note: As of 3/27/2021, it is not possible to download Original
+        Image files from Westlaw due to a bug in Chrome
+        (https://bugs.chromium.org/p/chromium/issues/detail?id=761295)
+        that prevents the browser from being able to load pdf
+        content-types in headless mode. As a workaround, we will use
+        Firefox in headless mode to grab sources from Hein, Westlaw,
+        and SSRN. Unfortunately, Playwright does not support loading
+        extensions in Firefox easily
+        (https://github.com/microsoft/playwright/issues/2644), so now
+        we have to use a mix of Chrome (to load extensions for clean
+        website screenshots) and Firefox (to pull Hein, Westlaw, SSRN).
         '''
-        ua = UserAgent()
-        self.ua_chrome = ua.google
-        self.ua_firefox = ua.firefox
         self._playwright = None
         self._chrome = None
         self._firefox = None
@@ -72,7 +80,7 @@ class Puller(object):
                 headless=False,
                 slow_mo=self.SLOW_MO,
                 accept_downloads=True,
-                user_agent=self.ua_chrome,
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 12_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
                 chromium_sandbox=False,
                 ignore_default_args=[
                     '--enable-automation',
@@ -102,7 +110,7 @@ class Puller(object):
                 headless=False,
                 slow_mo=self.SLOW_MO,
                 accept_downloads=True,
-                user_agent=self.ua_firefox,
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 12.2; rv:97.0) Gecko/20100101 Firefox/97.0',
                 chromium_sandbox=False,
                 ignore_default_args=[
                     '--enable-automation',
@@ -181,7 +189,6 @@ class Puller(object):
 
     @property
     def all_authenticated(self):
-        return True
         return (
             self.hein_authenticated
             and self.westlaw_authenticated
@@ -385,17 +392,6 @@ class Puller(object):
         either as an Original Image (if it's available) or using the
         download option.
 
-        Note: As of 3/27/2021, it is not possible to download Original
-        Image files from Westlaw due to a bug in Chrome
-        (https://bugs.chromium.org/p/chromium/issues/detail?id=761295)
-        that prevents the browser from being able to load pdf
-        content-types in headless mode. As a workaround, we will use
-        Firefox in headless mode to grab sources from Hein, Westlaw,
-        and SSRN. Unfortunately, Playwright does not support loading
-        extensions in Firefox easily
-        (https://github.com/microsoft/playwright/issues/2644), so now
-        we have to use a mix of Chrome (to load extensions for clean
-        website screenshots) and Firefox (to pull Hein, Westlaw, SSRN).
         :param page: The page to use for search
         :type page: Page
         :param project: The project it belongs to

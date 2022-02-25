@@ -4,5 +4,8 @@
   <property name="xfce4-power-manager" type="empty">
     <property name="power-button-action" type="empty"/>
     <property name="dpms-enabled" type="bool" value="false"/>
+    <property name="dpms-on-ac-sleep" type="uint" value="60"/>
+    <property name="blank-on-ac" type="int" value="60"/>
+    <property name="dpms-on-ac-off" type="uint" value="60"/>
   </property>
 </channel>

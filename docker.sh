@@ -8,10 +8,10 @@ export DISPLAY=:2
 vncserver \
   -geometry 1200x860 \
   -SecurityTypes None --I-KNOW-THIS-IS-INSECURE \
-  $DISPLAY &
+  $DISPLAY 1>/dev/null 2>/dev/null&
 
 # Start noVNC server
-./noVNC/utils/launch.sh --listen 3001 --vnc localhost:5902 &
+./noVNC/utils/launch.sh --listen 3001 --vnc localhost:5902 1>/dev/null 2>/dev/null&
 
 # Run flask
 export FLASK_ENV=development
