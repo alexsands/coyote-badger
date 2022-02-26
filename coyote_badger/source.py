@@ -45,6 +45,7 @@ class Source(object):
     def __init__(
             self, fn_num=None, long_cite=None, short_cite=None, filename=None,
             library=None, has_book=None, kind=None, result=None):
+        # Public properties that are used in the Source sheet
         self.fn_num = fn_num
         self.long_cite = long_cite or ''
         self.short_cite = short_cite or ''
@@ -53,6 +54,8 @@ class Source(object):
         self.has_book = has_book or ''
         self.kind = kind
         self.result = result
+        # Hidden properties that are not shown in the Source sheet
+        self._is_westlaw_reporter = self.infer_westlaw_reporter()
 
     @property
     def kind(self):
@@ -162,6 +165,19 @@ class Source(object):
         # For everything else, return Unknown so that the puller
         # does not waste its time.
         return Kind.UNKNOWN
+
+    def infer_westlaw_reporter(self):
+        '''Predicts whether or not the source is from the
+        Westlaw Reporter.
+
+        Given the short cite, this function predicts if the short cite
+        matches the Westlaw Reporter format (i.e., YYYY WL XX..XXX)
+        :returns: Whether or not it is from WL reporter
+        :rtype: {boolean}
+        '''
+        short_cite_no_periods = self.short_cite.replace('.', '')
+        if re.search('[0-9]{4} WL [0-9]+', short_cite_no_periods):
+            return True
 
     @staticmethod
     def from_json(data):

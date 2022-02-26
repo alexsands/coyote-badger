@@ -341,7 +341,7 @@ class Puller(object):
                 return
         raise NotFoundError
 
-    def _hein_download(self, a_tag, project, filename):
+    def _hein_download(self, a_tag, project, source, filename):
         '''Downloads a Hein source.
 
         Hein's download functionality is a bit strange with Playwright.
@@ -353,6 +353,8 @@ class Puller(object):
         :type project: Project
         :param a_tag: The <a> tag of the file to download
         :type a_tag: ElementHandle
+        :param source: The source we are downloading
+        :type source: Source
         :param filename: The filename to save the result as
         :type filename: str
         :returns: The filepath of the download
@@ -373,19 +375,18 @@ class Puller(object):
                     with new_page.expect_download(timeout=self.timeout(15)) as download_info:
                         new_page.click(btn_selector, timeout=self.timeout(10))
             download = download_info.value
-            download_path = project.save_pull_path(filename, 'pdf')
-            download.save_as(download_path)
-            download.path()
-            utils.remove_first_page(download_path)
+            save_filepath = project.save_pull_path(filename, 'pdf')
+            download.save_as(save_filepath)
+            utils.remove_first_page(save_filepath)
         except Exception as e:
             print(str(e))
             return None
         else:
-            return download_path
+            return save_filepath
         finally:
             new_page.close()
 
-    def _westlaw_download(self, page, project, filename):
+    def _westlaw_download(self, page, project, source, filename):
         '''Downloads a Westlaw source.
 
         Takes the present page on Westlaw and downloads the source,
@@ -396,6 +397,8 @@ class Puller(object):
         :type page: Page
         :param project: The project it belongs to
         :type project: Project
+        :param source: The source we are downloading
+        :type source: Source
         :param filename: The filename to save the result as
         :type filename: str
         :returns: The downloaded filepath
@@ -412,9 +415,10 @@ class Puller(object):
                 a_tag.click()
             download = download_info.value
             download.save_as(save_filepath)
-            download.path()
-        # ...if it does not, use the download button
-        else:
+            return save_filepath
+        # ...if it does not, and it is a state statute or Westlaw
+        # Reporter (WL), use the download button
+        elif source.kind == Kind.STATE or source._is_westlaw_reporter:
             page.click('#deliveryDropButton1')
             page.click('#deliveryRow1Download')
             # Set the download preferences
@@ -428,7 +432,10 @@ class Puller(object):
                 page.click('#coid_deliveryWaitMessage_downloadButton')
             download = download_info.value
             download.save_as(save_filepath)
-            download.path()
+            return save_filepath
+        # ...otherwise ignore it
+        else:
+            raise NoAttemptError
 
     def pull(self, source, project):
         '''Pulls a source.
@@ -475,6 +482,8 @@ class Puller(object):
                     os.remove(img_path)
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -501,6 +510,8 @@ class Puller(object):
                 download.path()
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -569,7 +580,7 @@ class Puller(object):
                 article_li = page.query_selector('.atocpage.sectionhighlight')
                 article_print_a = article_li.query_selector('a.contents_print')
                 article_path = self._hein_download(
-                    article_print_a, project,
+                    article_print_a, project, source,
                     '{}-article'.format(source.filename))
                 if not article_path:
                     raise Exception('Error while downloading journal article')
@@ -597,7 +608,7 @@ class Puller(object):
                         toc_method = 'global'
                 toc1_print_a = toc1_li.query_selector('a.contents_print')
                 toc1_path = self._hein_download(
-                    toc1_print_a, project,
+                    toc1_print_a, project, source,
                     '{}-toc1'.format(source.filename))
                 # ------------------------------------------------------
                 # Get the second Table of Contents (if needed)
@@ -622,7 +633,7 @@ class Puller(object):
                         pass  # do nothing because there was only one TOC
                     toc2_print_a = toc2_li.query_selector('a.contents_print')
                     toc2_path = self._hein_download(
-                        toc2_print_a, project,
+                        toc2_print_a, project, source,
                         '{}-toc2'.format(source.filename))
                 # ------------------------------------------------------
                 # Merge and save the PDFs
@@ -639,6 +650,8 @@ class Puller(object):
                     os.remove(pdf)
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -659,9 +672,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_STATUTES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -702,10 +720,14 @@ class Puller(object):
                 page.goto(chosen_edition_url)
                 page.wait_for_selector('.atocpage.sectionhighlight')
                 section_print_a = page.query_selector('.atocpage.sectionhighlight a.contents_print')
-                self._hein_download(
-                    section_print_a, project, source.filename)
+                download_path = self._hein_download(
+                    section_print_a, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -738,10 +760,14 @@ class Puller(object):
                 page.click('a:has-text("HeinOnline (PDF version)")')
                 page.wait_for_selector('.atocpage.sectionhighlight')
                 section_print_a = page.query_selector('.atocpage.sectionhighlight a.contents_print')
-                self._hein_download(
-                    section_print_a, project, source.filename)
+                download_path = self._hein_download(
+                    section_print_a, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -758,9 +784,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_CASES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -781,9 +812,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_CASES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
