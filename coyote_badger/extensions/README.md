@@ -5,7 +5,7 @@
 
 This extension helps bypass paywalls when pulling content. It uses
 [this Chrome extension](https://github.com/iamadamdev/bypass-paywalls-chrome)
-at version 1.7.8 with minor adjustments:
+at version 1.7.9 with minor adjustments:
 
 1. Line 201 in `/src/js/background.js` is commented out to prevent the options
 page from loading when Playwright launches a browser.
@@ -16,8 +16,8 @@ auto-updates that may break in the future:
 ```
 
 
-## ublock
+## uBlock0.chromium
 
 This extension blocks ads on websites to produce cleaner PDFs. It uses
 [this Chrome extension](https://github.com/gorhill/uBlock/)
-at version 1.33.2 with no adjustments.
+at version 1.41.8 with no adjustments.

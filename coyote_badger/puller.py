@@ -4,7 +4,6 @@ import shutil
 
 from urllib.parse import quote
 from urllib.request import urlretrieve
-from fake_useragent import UserAgent
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
@@ -19,7 +18,13 @@ class Puller(object):
     CHROME_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, 'chrome')
     FIREFOX_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, 'firefox')
     EXTENSIONS_FOLDER = os.path.join(PACKAGE_FOLDER, 'extensions')
+    EXTENSIONS = ','.join([
+        os.path.join(EXTENSIONS_FOLDER, 'uBlock0.chromium'),
+        os.path.join(EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
+    ])
 
+    SCREEN_WIDTH = 1200
+    SCREEN_HEIGHT = 860
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
 
     HEIN_SIGN_IN_URL = 'https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome'
@@ -41,10 +46,19 @@ class Puller(object):
 
         Puller stores the browsers that will be used to pull sources,
         and contains the logic for scraping the websites.
+
+        Note: As of 3/27/2021, it is not possible to download Original
+        Image files from Westlaw due to a bug in Chrome
+        (https://bugs.chromium.org/p/chromium/issues/detail?id=761295)
+        that prevents the browser from being able to load pdf
+        content-types in headless mode. As a workaround, we will use
+        Firefox in headless mode to grab sources from Hein, Westlaw,
+        and SSRN. Unfortunately, Playwright does not support loading
+        extensions in Firefox easily
+        (https://github.com/microsoft/playwright/issues/2644), so now
+        we have to use a mix of Chrome (to load extensions for clean
+        website screenshots) and Firefox (to pull Hein, Westlaw, SSRN).
         '''
-        ua = UserAgent()
-        self.ua_chrome = ua.google
-        self.ua_firefox = ua.firefox
         self._playwright = None
         self._chrome = None
         self._firefox = None
@@ -61,9 +75,28 @@ class Puller(object):
             if os.path.exists(self.CHROME_USER_DATA_DIR):
                 shutil.rmtree(self.CHROME_USER_DATA_DIR)
             os.mkdir(self.CHROME_USER_DATA_DIR)
-            self._chrome = self.create_context(
-                self.playwright.chromium, self.CHROME_USER_DATA_DIR,
-                self.ua_chrome)
+            self._chrome = self.playwright.chromium.launch_persistent_context(
+                self.CHROME_USER_DATA_DIR,
+                headless=False,
+                slow_mo=self.SLOW_MO,
+                accept_downloads=True,
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 12_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
+                chromium_sandbox=False,
+                ignore_default_args=[
+                    '--enable-automation',
+                ],
+                args=[
+                    '--disable-dev-shm-usage',
+                    '--no-default-browser-check',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-extensions-except={}'.format(self.EXTENSIONS),
+                    '--load-extension={}'.format(self.EXTENSIONS),
+                ],
+                viewport={
+                    'width': self.SCREEN_WIDTH,
+                    'height': self.SCREEN_HEIGHT,
+                })
         return self._chrome
 
     @property
@@ -72,9 +105,26 @@ class Puller(object):
             if os.path.exists(self.FIREFOX_USER_DATA_DIR):
                 shutil.rmtree(self.FIREFOX_USER_DATA_DIR)
             os.mkdir(self.FIREFOX_USER_DATA_DIR)
-            self._firefox = self.create_context(
-                self.playwright.firefox, self.FIREFOX_USER_DATA_DIR,
-                self.ua_firefox)
+            self._firefox = self.playwright.firefox.launch_persistent_context(
+                self.FIREFOX_USER_DATA_DIR,
+                headless=False,
+                slow_mo=self.SLOW_MO,
+                accept_downloads=True,
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 12.2; rv:97.0) Gecko/20100101 Firefox/97.0',
+                chromium_sandbox=False,
+                ignore_default_args=[
+                    '--enable-automation',
+                ],
+                args=[
+                    '--disable-dev-shm-usage',
+                    '--no-default-browser-check',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                ],
+                viewport={
+                    'width': self.SCREEN_WIDTH,
+                    'height': self.SCREEN_HEIGHT,
+                })
         return self._firefox
 
     @classmethod
@@ -82,35 +132,6 @@ class Puller(object):
         if os.path.exists(cls.BROWSER_USER_DATA_DIR):
             shutil.rmtree(cls.BROWSER_USER_DATA_DIR)
         os.mkdir(cls.BROWSER_USER_DATA_DIR)
-
-    @classmethod
-    def create_context(cls, browser, usr_dir, user_agent):
-        extensions = ','.join([
-            os.path.join(cls.EXTENSIONS_FOLDER, 'ublock'),
-            os.path.join(cls.EXTENSIONS_FOLDER, 'bypass-paywalls-chrome'),
-        ])
-        return browser.launch_persistent_context(
-            usr_dir,
-            headless=False,
-            slow_mo=cls.SLOW_MO,
-            accept_downloads=True,
-            user_agent=user_agent,
-            chromium_sandbox=False,
-            ignore_default_args=[
-                '--enable-automation',
-            ],
-            args=[
-                '--disable-dev-shm-usage',
-                '--no-default-browser-check',
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-extensions-except={}'.format(extensions),
-                '--load-extension={}'.format(extensions),
-            ],
-            viewport={
-                'width': 1280,
-                'height': 780,
-            })
 
     @classmethod
     def timeout(cls, sec):
@@ -311,15 +332,16 @@ class Puller(object):
         :type search_term: str
         '''
         page.goto(url)
+        page.wait_for_selector('#searchInputId', timeout=self.timeout(20))
         page.fill('#searchInputId', search_term)
         page.click('#searchButton')
-        try:
-            page.wait_for_selector('#co_docHeader #title', timeout=self.timeout(20))
-        except Exception as e:
-            print(str(e))
-            raise NotFoundError
+        for i in range(20):
+            page.wait_for_timeout(self.timeout(1))
+            if page.query_selector('#co_docHeader #title'):
+                return
+        raise NotFoundError
 
-    def _hein_download(self, a_tag, project, filename):
+    def _hein_download(self, a_tag, project, source, filename):
         '''Downloads a Hein source.
 
         Hein's download functionality is a bit strange with Playwright.
@@ -331,6 +353,8 @@ class Puller(object):
         :type project: Project
         :param a_tag: The <a> tag of the file to download
         :type a_tag: ElementHandle
+        :param source: The source we are downloading
+        :type source: Source
         :param filename: The filename to save the result as
         :type filename: str
         :returns: The filepath of the download
@@ -351,40 +375,30 @@ class Puller(object):
                     with new_page.expect_download(timeout=self.timeout(15)) as download_info:
                         new_page.click(btn_selector, timeout=self.timeout(10))
             download = download_info.value
-            download_path = project.save_pull_path(filename, 'pdf')
-            download.save_as(download_path)
-            download.path()
-            utils.remove_first_page(download_path)
+            save_filepath = project.save_pull_path(filename, 'pdf')
+            download.save_as(save_filepath)
+            utils.remove_first_page(save_filepath)
         except Exception as e:
             print(str(e))
             return None
         else:
-            return download_path
+            return save_filepath
         finally:
             new_page.close()
 
-    def _westlaw_download(self, page, project, filename):
+    def _westlaw_download(self, page, project, source, filename):
         '''Downloads a Westlaw source.
 
         Takes the present page on Westlaw and downloads the source,
         either as an Original Image (if it's available) or using the
         download option.
 
-        Note: As of 3/27/2021, it is not possible to download Original
-        Image files from Westlaw due to a bug in Chrome
-        (https://bugs.chromium.org/p/chromium/issues/detail?id=761295)
-        that prevents the browser from being able to load pdf
-        content-types in headless mode. As a workaround, we will use
-        Firefox in headless mode to grab sources from Hein, Westlaw,
-        and SSRN. Unfortunately, Playwright does not support loading
-        extensions in Firefox easily
-        (https://github.com/microsoft/playwright/issues/2644), so now
-        we have to use a mix of Chrome (to load extensions for clean
-        website screenshots) and Firefox (to pull Hein, Westlaw, SSRN).
         :param page: The page to use for search
         :type page: Page
         :param project: The project it belongs to
         :type project: Project
+        :param source: The source we are downloading
+        :type source: Source
         :param filename: The filename to save the result as
         :type filename: str
         :returns: The downloaded filepath
@@ -401,10 +415,12 @@ class Puller(object):
                 a_tag.click()
             download = download_info.value
             download.save_as(save_filepath)
-            download.path()
-        # ...if it does not, use the download button
-        else:
-            page.click('#deliveryLink1')
+            return save_filepath
+        # ...if it does not, and it is a state statute or Westlaw
+        # Reporter (WL), use the download button
+        elif source.kind == Kind.STATE or source._is_westlaw_reporter:
+            page.click('#deliveryDropButton1')
+            page.click('#deliveryRow1Download')
             # Set the download preferences
             page.click('#co_deliveryOptionsTab1')
             page.select_option('#co_delivery_format_fulltext', value='Pdf')
@@ -416,7 +432,10 @@ class Puller(object):
                 page.click('#coid_deliveryWaitMessage_downloadButton')
             download = download_info.value
             download.save_as(save_filepath)
-            download.path()
+            return save_filepath
+        # ...otherwise ignore it
+        else:
+            raise NoAttemptError
 
     def pull(self, source, project):
         '''Pulls a source.
@@ -463,6 +482,8 @@ class Puller(object):
                     os.remove(img_path)
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -489,6 +510,8 @@ class Puller(object):
                 download.path()
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -557,7 +580,7 @@ class Puller(object):
                 article_li = page.query_selector('.atocpage.sectionhighlight')
                 article_print_a = article_li.query_selector('a.contents_print')
                 article_path = self._hein_download(
-                    article_print_a, project,
+                    article_print_a, project, source,
                     '{}-article'.format(source.filename))
                 if not article_path:
                     raise Exception('Error while downloading journal article')
@@ -585,7 +608,7 @@ class Puller(object):
                         toc_method = 'global'
                 toc1_print_a = toc1_li.query_selector('a.contents_print')
                 toc1_path = self._hein_download(
-                    toc1_print_a, project,
+                    toc1_print_a, project, source,
                     '{}-toc1'.format(source.filename))
                 # ------------------------------------------------------
                 # Get the second Table of Contents (if needed)
@@ -610,7 +633,7 @@ class Puller(object):
                         pass  # do nothing because there was only one TOC
                     toc2_print_a = toc2_li.query_selector('a.contents_print')
                     toc2_path = self._hein_download(
-                        toc2_print_a, project,
+                        toc2_print_a, project, source,
                         '{}-toc2'.format(source.filename))
                 # ------------------------------------------------------
                 # Merge and save the PDFs
@@ -627,6 +650,8 @@ class Puller(object):
                     os.remove(pdf)
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -647,9 +672,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_STATUTES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -690,10 +720,14 @@ class Puller(object):
                 page.goto(chosen_edition_url)
                 page.wait_for_selector('.atocpage.sectionhighlight')
                 section_print_a = page.query_selector('.atocpage.sectionhighlight a.contents_print')
-                self._hein_download(
-                    section_print_a, project, source.filename)
+                download_path = self._hein_download(
+                    section_print_a, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -726,10 +760,14 @@ class Puller(object):
                 page.click('a:has-text("HeinOnline (PDF version)")')
                 page.wait_for_selector('.atocpage.sectionhighlight')
                 section_print_a = page.query_selector('.atocpage.sectionhighlight a.contents_print')
-                self._hein_download(
-                    section_print_a, project, source.filename)
+                download_path = self._hein_download(
+                    section_print_a, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -746,9 +784,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_CASES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE
@@ -769,9 +812,14 @@ class Puller(object):
             try:
                 self._westlaw_search(
                     page, self.WESTLAW_CASES_URL, source.short_cite)
-                self._westlaw_download(page, project, source.filename)
+                download_path = self._westlaw_download(
+                    page, project, source, source.filename)
+                if not download_path:
+                    raise Exception('No download path returned')
             except NotFoundError:
                 result = Result.NOT_FOUND
+            except NoAttemptError:
+                result = Result.NO_ATTEMPT
             except Exception as e:
                 print(str(e))
                 result = Result.FAILURE

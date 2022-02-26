@@ -5,6 +5,7 @@ _projects/*
 _projects/**/*
 !_projects/.gitkeep
 external
+.DS_Store
 
 
 ###Python###

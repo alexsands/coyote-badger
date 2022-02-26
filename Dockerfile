@@ -3,60 +3,15 @@ FROM ubuntu:20.04
 # Setup working directory
 RUN mkdir -p /opt/coyotebadger
 WORKDIR /opt/coyotebadger
+
+# Setup env and args
+ENV PYTHONUNBUFFERED=1
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Install microsoft/playwright additional dependencies
-# See: https://github.com/microsoft/playwright/blob/master/utils/docker/Dockerfile.bionic
-# Install WebKit dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libwoff1 \
-    libopus0 \
-    libwebp6 \
-    libwebpdemux2 \
-    libenchant1c2a \
-    libgudev-1.0-0 \
-    libsecret-1-0 \
-    libhyphen0 \
-    libgdk-pixbuf2.0-0 \
-    libegl1 \
-    libnotify4 \
-    libxslt1.1 \
-    libgles2 \
-    libxcomposite1 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libepoxy0 \
-    libgtk-3-0 \
-    libharfbuzz-icu0
-# Install gstreamer and plugins to support video playback in WebKit.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgstreamer-gl1.0-0 \
-    libgstreamer-plugins-bad1.0-0 \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-libav
-# Install Chromium dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    fonts-liberation \
-    libnss3 \
-    libxss1 \
-    libasound2 \
-    fonts-noto-color-emoji
-# Install Firefox dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libdbus-glib-1-2 \
-    libxt6
-# Install XVFB to run browsers in headful mode
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    xvfb
-
-# Install items for external/playwright-python
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    unzip
-
 # Install python and pip
-RUN apt-get update && apt-get install -y software-properties-common
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    git
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y \
     python3.9 \
@@ -70,19 +25,44 @@ RUN pip3 --version
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-# Install external requirements from source
-RUN git clone --branch=v1.12.0 https://github.com/microsoft/playwright-python.git external/playwright-python-1.12.0
-RUN pip3 install external/playwright-python-1.12.0
+# Install playwright browsers
+RUN playwright install chromium firefox
+RUN playwright install-deps chromium firefox
+
+# Install XFCE4 and TigerVNC to run browsers in headful mode
+RUN apt-get update && apt-get install -y \
+    xfce4 \
+    xfce4-goodies \
+    wmctrl
+RUN apt-get purge -y \
+    pm-utils \
+    xfce4-panel \
+    xscreensaver*
+RUN apt-get update && apt-get install -y \
+    tigervnc-standalone-server \
+    tigervnc-common
+RUN mkdir ~/.vnc
+RUN echo "password" | vncpasswd -f >> ~/.vnc/passwd
+RUN chmod 600 ~/.vnc/passwd
+ADD xfce4/xstartup /root/.vnc/xstartup
+RUN chmod +x ~/.vnc/xstartup
+ADD xfce4/xfce4-desktop.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+ADD xfce4/xfce4-power-manager.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
+
+# Install and setup noVNC to view VNC client
+RUN git clone --branch=v1.1.0 https://github.com/novnc/noVNC.git
+ENV XFCE_PANEL_MIGRATE_DEFAULT 1
+ADD xfce4/noVNC_full.html noVNC/index.html
+ADD xfce4/noVNC_ui.js noVNC/app/ui.js
 
 # For debugging
 RUN pip3 freeze
 
-# Install playwright browsers
-RUN python3 -m playwright install
-
 # Add source files
 COPY coyote_badger coyote_badger
+COPY xfce4 xfce4
 COPY docker.sh docker.sh
 
+# Run the boot up script
 RUN chmod +x docker.sh
 CMD ./docker.sh

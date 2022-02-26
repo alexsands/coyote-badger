@@ -1,5 +1,6 @@
 import os
 
+from threading import Timer
 from colorama import init
 from flask import Flask
 from flask import request
@@ -24,6 +25,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 Bootstrap(app)
 
+PORT = 3000
 citations = None
 puller = Puller()
 puller.clear_user_data()
@@ -41,6 +43,38 @@ def ErrorResponse(message=None):
         'error': True,
         'message': message or '',
     }
+
+
+def welcome():
+    print(r'''
+
+
+
+
+
+
+
+
+
+
+   ______    ___   ____  ____   ___    _________  ________
+ .' ___  | .'   `.|_  _||_  _|.'   `. |  _   _  ||_   __  |
+/ .'   \_|/  .-.  \ \ \  / / /  .-.  \|_/ | | \_|  | |_ \_|
+| |       | |   | |  \ \/ /  | |   | |    | |      |  _| _
+\ `.___.'\\  `-'  /  _|  |_  \  `-'  /   _| |_    _| |__/ |
+ `.____ .' `.___.'  |______|  `.___.'   |_____|  |________|
+ ______        _       ______      ______  ________  _______
+|_   _ \      / \     |_   _ `.  .' ___  ||_   __  ||_   __ \
+  | |_) |    / _ \      | | `. \/ .'   \_|  | |_ \_|  | |__) |
+  |  __'.   / ___ \     | |  | || |   ____  |  _| _   |  __ /
+ _| |__) |_/ /   \ \_  _| |_.' /\ `.___]  |_| |__/ | _| |  \ \_
+|_______/|____| |____||______.'  `._____.'|________||____| |___|
+
+
+Coyote Badger is ready to use!
+Open your browser to http://localhost:{} to get started.
+
+'''.format(PORT))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -266,4 +300,6 @@ def pull():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', threaded=False)
+    t = Timer(3, welcome)
+    t.start()
+    app.run(host='0.0.0.0', port=PORT, threaded=False, use_reloader=False)

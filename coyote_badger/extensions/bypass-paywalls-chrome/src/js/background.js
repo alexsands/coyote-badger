@@ -5,7 +5,8 @@ const restrictions = {
   'barrons.com': /.+barrons\.com\/(amp\/)?article(s)?\/.+/,
   'economist.com': /.+economist\.com\/.+\/\d{1,4}\/\d{1,2}\/\d{2}\/.+/,
   'seekingalpha.com': /.+seekingalpha\.com\/article\/.+/,
-  'techinasia.com': /\.techinasia\.com\/.+/
+  'techinasia.com': /\.techinasia\.com\/.+/,
+  'ft.com': /.+\.ft.com\/content\//
 };
 
 // Don't remove cookies before page load
@@ -23,7 +24,6 @@ const allowCookies = [
   'destentor.nl',
   'ed.nl',
   'examiner.com.au',
-  'ft.com',
   'gelocal.it',
   'gelderlander.nl',
   'grubstreet.com',
@@ -34,7 +34,6 @@ const allowCookies = [
   'lrb.co.uk',
   'medium.com',
   'mercurynews.com',
-  'mexiconewsdaily.com',
   'newstatesman.com',
   'nrc.nl',
   'nymag.com',
@@ -47,6 +46,7 @@ const allowCookies = [
   'seekingalpha.com',
   'sofrep.com',
   'spectator.co.uk',
+  'speld.nl',
   'tubantia.nl',
   'techinasia.com',
   'telegraaf.nl',
@@ -65,7 +65,6 @@ const allowCookies = [
   'volkskrant.nl',
   'vulture.com',
   'washingtonpost.com',
-  'wired.com',
   'nzz.ch',
   'handelsblatt.com',
   'thehindu.com',
@@ -75,7 +74,8 @@ const allowCookies = [
   'themarker.com',
   'sueddeutsche.de',
   'gelocal.it',
-  'elmundo.es'
+  'elmundo.es',
+  'time.com'
 ];
 
 // Removes cookies after page load
@@ -94,7 +94,6 @@ const removeCookies = [
   'destentor.nl',
   'ed.nl',
   'examiner.com.au',
-  'ft.com',
   'gelderlander.nl',
   'globes.co.il',
   'grubstreet.com',
@@ -103,7 +102,6 @@ const removeCookies = [
   'humo.be',
   'lesechos.fr',
   'mercurynews.com',
-  'mexiconewsdaily.com',
   'newstatesman.com',
   'nrc.nl',
   'nymag.com',
@@ -114,6 +112,7 @@ const removeCookies = [
   'seattletimes.com',
   'sofrep.com',
   'spectator.co.uk',
+  'speld.nl',
   'telegraaf.nl',
   'theadvocate.com.au',
   'theage.com.au',
@@ -125,7 +124,6 @@ const removeCookies = [
   'tubantia.nl',
   'vn.nl',
   'vulture.com',
-  'wired.com',
   'wsj.com'
 ];
 
@@ -153,7 +151,8 @@ const removeCookiesSelectDrop = {
   'humo.be': ['TID_ID'],
   'nrc.nl': ['counter'],
   'pzc.nl': ['temptationTrackingId'],
-  'tubantia.nl': ['temptationTrackingId']
+  'tubantia.nl': ['temptationTrackingId'],
+  'speld.nl': ['speld-paywall']
 };
 
 // Override User-Agent with Googlebot
@@ -166,7 +165,6 @@ const useGoogleBotSites = [
   'genomeweb.com',
   'heraldsun.com.au',
   'lavoixdunord.fr',
-  'mexiconewsdaily.com',
   'ntnews.com.au',
   'quora.com',
   'seekingalpha.com',
@@ -180,8 +178,9 @@ const useGoogleBotSites = [
   'republic.ru',
   'nzz.ch',
   'handelsblatt.com',
-  'washingtonpost.com',
-  'df.cl'
+  'df.cl',
+  'ft.com',
+  'wired.com'
 ];
 
 // Override User-Agent with Bingbot
@@ -240,7 +239,8 @@ const blockedRegexes = {
   'technologyreview.com': /.+\.blueconic\.net\/.+/,
   'spectator.us': /(cdn\.cxense\.com\/.+|\.tinypass\.com\/.+)/,
   'gelocal.it': /(\.repstatic\.it\/minify\/sites\/gelocal\/.+\/config\.cache(_\d)?\.php|cdn\.ampproject\.org\/v\d\/amp-(access|ad)-.+\.js)/,
-  'elmundo.es': /cdn\.ampproject\.org\/v\d\/amp-(access|ad|consent)-.+\.js/
+  'elmundo.es': /cdn\.ampproject\.org\/v\d\/amp-(access|ad|consent)-.+\.js/,
+  'time.com': /\/time\.com\/dist\/meter-wall-client-js\..+\.js/
 };
 
 const userAgentDesktop = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
