@@ -14,7 +14,7 @@
     Connect parameters are provided in query string:
         http://example.com/?host=HOST&port=PORT&scale=true
     -->
-    <title>Coyote Badger Background Viewer</title>
+    <title>Coyote Badger Live Viewer</title>
 
     <meta charset="utf-8">
 
@@ -29,25 +29,6 @@
         }
         html {
             height: 100%;
-        }
-
-        #top_bar {
-            background-color: #6e84a3;
-            color: white;
-            font: bold 12px Helvetica;
-            padding: 6px 5px 4px 5px;
-            border-bottom: 1px outset;
-        }
-        #status {
-            text-align: center;
-        }
-        #sendCtrlAltDelButton {
-            position: fixed;
-            top: 0px;
-            right: 0px;
-            border: 1px outset;
-            padding: 5px 5px 4px 5px;
-            cursor: pointer;
         }
 
         #screen {
@@ -187,14 +168,9 @@
         rfb.viewOnly = readQueryVariable('view_only', true);
         rfb.scaleViewport = readQueryVariable('scale', false);
     </script>
-    <script>setTimeout(() => document.querySelector('#top_bar').remove(), 500);</script>
 </head>
 
 <body>
-    <div id="top_bar">
-        <div id="status">Loading</div>
-        <div id="sendCtrlAltDelButton">Send CtrlAltDel</div>
-    </div>
     <div id="screen">
         <!-- This is where the remote screen will appear -->
     </div>

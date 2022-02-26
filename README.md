@@ -89,9 +89,8 @@ automated browser controler.
 
 ### Running from Source in Docker
 1. Follow the [Run](#run) instructions
-2. On the Viewer page you can add `/vnc.html?view_only=false` to the end of
-the URL to allow you to interact with the browser, like so:
-[http://localhost:3001/vnc.html?view_only=false](http://localhost:3001/vnc.html?view_only=false)
+2. On the `Watch Live` page you can toggle `View Only` in the VNC settings
+to interact with the browser, like so.
 
 ### Running from Source in Python
 Sometimes it can be easier to run Coyote Badger directly from source with
@@ -204,15 +203,15 @@ again.
 
 #### Coyote Badger is suddenly failing on a specific type of source. What do I do?
 
-First, try to figure out why it's failing by opening the [Viewer](http://localhost:3001)
-while Coyote Badger is running. Is there an unexpected page? What about a change
-to the way Hein or Westlaw look?
+First, try to figure out why it's failing by opening the
+[Watch Live](http://localhost:3001) page while Coyote Badger is running.
+Is there an unexpected page? What about a change to the way Hein, Westlaw,
+or SSRN looks?
 
 If it's something you could fix by manually clicking on the page, you can
-add `/vnc.html?view_only=false` to the end of the Viewer URL like so:
-[http://localhost:3001/vnc.html?view_only=false](http://localhost:3001/vnc.html?view_only=false).
-Then, simply click on the browser in the Viewer whenever you need to (only
-do this if you are sure of what you're doing!).
+open the VNC toolbar on the left hand side, then click the gear icon, then
+turn off `View Only`. Then, simply click on the browser page whenever you
+need to (only do this if you are sure of what you're doing!).
 
 If it's not something you could fix easily, open up an
 [issue](https://github.com/alexsands/coyote-badger/issues).

@@ -33,8 +33,7 @@ RUN playwright install-deps chromium firefox
 RUN apt-get update && apt-get install -y \
     xfce4 \
     xfce4-goodies \
-    wmctrl \
-    xterm
+    wmctrl
 RUN apt-get purge -y \
     pm-utils \
     xfce4-panel \
@@ -53,7 +52,8 @@ ADD xfce4/xfce4-power-manager.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml
 # Install and setup noVNC to view VNC client
 RUN git clone --branch=v1.1.0 https://github.com/novnc/noVNC.git
 ENV XFCE_PANEL_MIGRATE_DEFAULT 1
-ADD xfce4/noVNC.html noVNC/index.html
+ADD xfce4/noVNC_full.html noVNC/index.html
+ADD xfce4/noVNC_ui.js noVNC/app/ui.js
 
 # For debugging
 RUN pip3 freeze
