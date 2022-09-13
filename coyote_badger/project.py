@@ -154,7 +154,7 @@ class Project(object):
         :rtype: {str}
         """
         if extension:
-            filename = "{}.{}".format(filename, extension)
+            filename = f"{filename}.{extension}"
         return os.path.join(self.pull_folder, filename)
 
     def build_source_from_row(self, row):

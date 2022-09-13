@@ -117,4 +117,4 @@ def create_sources_template(doc_file):
         temp_name = temp_file.name
     project = Project(temp_name, load_workbook(SOURCES_TEMPLATE_FILE))
     project.save_sources(sources)
-    return project
+    return project, sources

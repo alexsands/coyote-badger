@@ -1,6 +1,8 @@
 import os
+import uuid
 from threading import Timer
 
+import segment.analytics as analytics
 from colorama import init
 from flask import (
     Flask,
@@ -13,11 +15,14 @@ from flask import (
 )
 from flask_bootstrap import Bootstrap
 
-from coyote_badger.config import SOURCES_TEMPLATE_FILE
+from coyote_badger.config import PORT, SEGMENT_WRITE_KEY, SOURCES_TEMPLATE_FILE
 from coyote_badger.converter import create_sources_template
 from coyote_badger.project import Project
 from coyote_badger.puller import Puller
 from coyote_badger.source import Kind, Result, Source
+
+analytics.write_key = SEGMENT_WRITE_KEY
+anonymous_id = str(uuid.uuid4())
 
 init()
 
@@ -25,7 +30,6 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 Bootstrap(app)
 
-PORT = 3000
 citations = None
 puller = Puller()
 puller.clear_user_data()
@@ -47,7 +51,7 @@ def ErrorResponse(message=None):
 
 def welcome():
     print(
-        r"""
+        rf"""
 
 
 
@@ -73,11 +77,9 @@ def welcome():
 
 
 Coyote Badger is ready to use!
-Open your browser to http://localhost:{} to get started.
+Open your browser to http://localhost:{PORT} to get started.
 
-""".format(
-            PORT
-        )
+"""
     )
 
 
@@ -93,6 +95,16 @@ def index():
     """
     projects = Project.get_projects()
     if request.method == "GET":
+        analytics.page(
+            anonymous_id=anonymous_id,
+            name="Home",
+            context={
+                "page": {
+                    "url": request.path,
+                    "title": "Home",
+                },
+            },
+        )
         return render_template("index.html.j2", projects=projects)
     elif request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -127,7 +139,7 @@ def index():
             return render_template(
                 "index.html.j2",
                 projects=projects,
-                error="Failed to create your project. {}".format(str(e)),
+                error=f"Failed to create your project. {str(e)}",
             )
 
         # Everything worked, go to the /sources page for the project
@@ -142,6 +154,15 @@ def about():
 
     GET: renders the about page
     """
+    analytics.page(
+        anonymous_id=anonymous_id,
+        name="About",
+        context={
+            "page": {
+                "url": request.path,
+            },
+        },
+    )
     return render_template("about.html.j2")
 
 
@@ -165,6 +186,16 @@ def convert():
     POST: makes the sources template page from a form submission
     """
     if request.method == "GET":
+        analytics.page(
+            anonymous_id=anonymous_id,
+            name="Convert",
+            context={
+                "page": {
+                    "url": request.path,
+                    "title": "Convert",
+                },
+            },
+        )
         return render_template("convert.html.j2")
     elif request.method == "POST":
         doc_file = request.files.get("file")
@@ -176,7 +207,7 @@ def convert():
             )
 
         try:
-            project = create_sources_template(doc_file)
+            project, sources = create_sources_template(doc_file)
 
             @after_this_request
             def remove_temp_file(response):
@@ -184,16 +215,30 @@ def convert():
                 return response
 
         except Exception as e:
+            analytics.track(
+                anonymous_id=anonymous_id,
+                event="Source Conversion Failed",
+                properties={
+                    "message": str(e),
+                },
+            )
             return render_template(
                 "convert.html.j2",
-                error="Your file could not be converted. {}".format(str(e)),
+                error=f"Your file could not be converted. {str(e)}",
             )
         else:
             input_filename = os.path.splitext(doc_file.filename)[0]
+            analytics.track(
+                anonymous_id=anonymous_id,
+                event="Source Conversion Succeeded",
+                properties={
+                    "count": len(sources),
+                },
+            )
             return send_file(
                 project.sources_file,
                 as_attachment=True,
-                attachment_filename="{}_Sources.xlsx".format(input_filename),
+                attachment_filename=f"{input_filename}_Sources.xlsx",
             )
 
 
@@ -208,6 +253,16 @@ def login():
     POST: attempts login and redirects if successful; shows error if not
     """
     if request.method == "GET":
+        analytics.page(
+            anonymous_id=anonymous_id,
+            name="Login",
+            context={
+                "page": {
+                    "url": request.path,
+                    "title": "Login",
+                },
+            },
+        )
         return render_template("login.html.j2")
     elif request.method == "POST":
         project_name = request.args.get("project")
@@ -247,11 +302,19 @@ def login():
                 ssrn_password,
             )
         except Exception as e:
+            analytics.track(
+                anonymous_id=anonymous_id,
+                event="Login Failed",
+                properties={
+                    "message": str(e),
+                },
+            )
             return render_template(
                 "login.html.j2",
-                error="{} Check your username and password.".format(str(e)),
+                error=f"{str(e)} Check your username and password.",
             )
 
+        analytics.track(anonymous_id=anonymous_id, event="Login Succeeded")
         # Redirect the user back to the project or home screen
         if project_name:
             return redirect(url_for("sources", project_name=project_name))
@@ -273,6 +336,16 @@ def sources(project_name):
     if request.method == "GET":
         if not project:
             return redirect(url_for("index"))
+        analytics.page(
+            anonymous_id=anonymous_id,
+            name="Sources",
+            context={
+                "page": {
+                    "url": request.path,
+                    "title": "Sources",
+                },
+            },
+        )
         return render_template(
             "sources.html.j2",
             Kind=Kind,
@@ -313,6 +386,13 @@ def pull():
         source = project.get_source(index)
         source.result = puller.pull(source, project)
         project.save_source(index, source)
+        analytics.track(
+            anonymous_id=anonymous_id,
+            event="Source Pulled",
+            properties={
+                "source": source.to_json(),
+            },
+        )
         return {
             "error": False,
             "result": source.result.value,
@@ -323,3 +403,4 @@ if __name__ == "__main__":
     t = Timer(3, welcome)
     t.start()
     app.run(host="0.0.0.0", port=PORT, threaded=False, use_reloader=False)
+    analytics.track(anonymous_id=anonymous_id, event="Application Started")
