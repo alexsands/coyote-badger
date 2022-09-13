@@ -70,10 +70,10 @@ system:
 3. Right click on the `__WINDOWS-START.bat` file, then select "Open".
    Accept the warning about the unidentified developer if it asks (you
    should only have to do this step once).
-4. A Command Prompt window will open and you'll see it printing out information. 
+4. A Command Prompt window will open and you'll see it printing out information.
    Wait until you see the "Coyote Badger is ready to use!" message.
-   Once you see this, you can close the Command Prompt window. If it's your 
-   first time running Coyote Badger, a lot of stuff will install and this will 
+   Once you see this, you can close the Command Prompt window. If it's your
+   first time running Coyote Badger, a lot of stuff will install and this will
    take several minutes (but you shouldn't have to wait this long again!).
 5. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 6. You should see Coyote Badger!

@@ -3,5 +3,10 @@
         "editor.rulers": [
             80
         ]
+    },
+    "[python]": {
+        "editor.rulers": [
+            88
+        ]
     }
 }

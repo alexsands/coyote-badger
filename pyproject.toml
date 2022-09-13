@@ -1,2 +1,12 @@
 [tool.isort]
 profile = "black"
+
+[tool.black]
+extend-exclude = """
+(
+  ^/_projects/
+  | ^/xfce4/
+  | ^/coyote_badger/static/
+  | ^/coyote_badger/extensions/
+)
+"""
