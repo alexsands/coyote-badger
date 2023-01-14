@@ -2,6 +2,7 @@ import os
 import uuid
 from threading import Timer
 
+import requests
 import segment.analytics as analytics
 from colorama import init
 from flask import (
@@ -14,8 +15,15 @@ from flask import (
     url_for,
 )
 from flask_bootstrap import Bootstrap
+from packaging import version
 
-from coyote_badger.config import PORT, SEGMENT_WRITE_KEY, SOURCES_TEMPLATE_FILE
+from coyote_badger.config import (
+    PORT,
+    REPO,
+    SEGMENT_WRITE_KEY,
+    SOURCES_TEMPLATE_FILE,
+    VERSION,
+)
 from coyote_badger.converter import create_sources_template
 from coyote_badger.project import Project
 from coyote_badger.puller import Puller
@@ -34,26 +42,7 @@ citations = None
 puller = Puller()
 puller.clear_user_data()
 
-
-def SuccessResponse(message=None):
-    return {
-        "error": False,
-        "message": message or "",
-    }
-
-
-def ErrorResponse(message=None):
-    return {
-        "error": True,
-        "message": message or "",
-    }
-
-
-def welcome():
-    print(
-        rf"""
-
-
+ART_MESSAGE = r"""
 
 
 
@@ -74,13 +63,48 @@ def welcome():
   |  __'.   / ___ \     | |  | || |   ____  |  _| _   |  __ /
  _| |__) |_/ /   \ \_  _| |_.' /\ `.___]  |_| |__/ | _| |  \ \_
 |_______/|____| |____||______.'  `._____.'|________||____| |___|
-
-
+"""
+UPDATE_MESSAGE = rf"""
+===================================================================
+                        UPDATE AVAILABLE
+There is a new version of Coyote Badger available! Please make sure
+you update to the latest version if you're experiencing issues. For
+information on how to update, see this link:
+https://github.com/{REPO}#update
+===================================================================
+"""
+READY_MESSAGE = rf"""
 Coyote Badger is ready to use!
 Open your browser to http://localhost:{PORT} to get started.
-
 """
-    )
+
+
+def SuccessResponse(message=None):
+    return {
+        "error": False,
+        "message": message or "",
+    }
+
+
+def ErrorResponse(message=None):
+    return {
+        "error": True,
+        "message": message or "",
+    }
+
+
+def has_updates():
+    response = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest")
+    latest_tag = response.json().get("tag_name")
+    if version.parse(VERSION) < version.parse(latest_tag):
+        return True
+
+
+def welcome():
+    print(ART_MESSAGE)
+    if has_updates():
+        print(UPDATE_MESSAGE)
+    print(READY_MESSAGE)
 
 
 @app.route("/", methods=["GET", "POST"])

@@ -2,14 +2,33 @@
 
 ![Coyote Badger Home Screen](./coyote_badger/static/home.png)
 
-#### Table of Contents
-1. [Getting Started](#getting-started)
-2. [Install](#install)
-3. [Run](#run)
-4. [Development](#development)
-5. [Making or Requesting Changes](#making-or-requesting-changes)
-6. [Videos](#videos)
-7. [FAQ](#faq)
+## Table of Contents
+- [Coyote Badger](#coyote-badger)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+  - [Install](#install)
+  - [Run](#run)
+      - [Mac (Intel or Apple Silicon)](#mac-intel-or-apple-silicon)
+      - [Windows](#windows)
+  - [Update](#update)
+  - [Development](#development)
+    - [Running from Source in Docker](#running-from-source-in-docker)
+    - [Running from Source in Python](#running-from-source-in-python)
+    - [Project Structure](#project-structure)
+  - [Making or Requesting Changes](#making-or-requesting-changes)
+  - [Videos](#videos)
+  - [FAQ](#faq)
+      - [How do I get notified of issues, changes, or new versions of Coyote Badger?](#how-do-i-get-notified-of-issues-changes-or-new-versions-of-coyote-badger)
+      - [When I try to run the application, I get a message about not being able to connect to the Docker daemon. What do I do?](#when-i-try-to-run-the-application-i-get-a-message-about-not-being-able-to-connect-to-the-docker-daemon-what-do-i-do)
+      - [Docker is taking up a lot of space on my computer. What should I do?](#docker-is-taking-up-a-lot-of-space-on-my-computer-what-should-i-do)
+      - [Coyote Badger is suddenly failing on a specific type of source. What do I do?](#coyote-badger-is-suddenly-failing-on-a-specific-type-of-source-what-do-i-do)
+      - [Everything is installed, it's running, but the actual Coyote Badger application isn't pulling sources properly. What do I do?](#everything-is-installed-its-running-but-the-actual-coyote-badger-application-isnt-pulling-sources-properly-what-do-i-do)
+      - [Hein login seems to always fail because my Duo isn't working. What do I do?](#hein-login-seems-to-always-fail-because-my-duo-isnt-working-what-do-i-do)
+      - [My HeinOnline account was deactivated because of dowload activity. What should I do?](#my-heinonline-account-was-deactivated-because-of-dowload-activity-what-should-i-do)
+      - [Why use `headless=False` with `xvfb` if you can't even see the browser?](#why-use-headlessfalse-with-xvfb-if-you-cant-even-see-the-browser)
+      - [Why is git ignoring some files when I make changes?](#why-is-git-ignoring-some-files-when-i-make-changes)
+      - [Something else?](#something-else)
+  - [Maintenance](#maintenance)
 
 
 ## Getting Started
@@ -81,6 +100,24 @@ system:
    `__WINDOWS-STOP.bat` file in the Coyote Badger folder, then select "Open".
    Accept the warning about the unidentified developer if it asks (you
    should only have to do this step once).
+
+
+## Update
+Please make sure to update to the newest version of Coyote Badger when it is
+released. The content and layout of these websites changes somewhat regularly
+so if you're experiencing issues, it may get fixed in a future release. To
+update your version:
+1. Stop Coyote Badger using the `__MAC-STOP.command` or `__WINDOWS-STOP.bat`
+   files.
+2. Copy the `_projects` folder if you want to save your previous projects.
+3. Delete your Coyote Badger folder.
+4. Download the latest "Source code (zip)" of Coyote Badger from
+   [here](https://github.com/alexsands/coyote-badger/releases/latest).
+   Then unzip the file and move it to somewhere on your computer that you'll
+   remember (e.g., `Documents` folder). You can rename the containing folder
+   if you'd like.
+5. Restore your `_projects` folder if you backed it up in step 2.5.
+6. That's it! Now you can [run Coyote Badger](#run).
 
 
 ## Development

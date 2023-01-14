@@ -8,3 +8,6 @@ SOURCES_TEMPLATE_FILE = os.path.join(PACKAGE_FOLDER, "static", "Sources.xlsx")
 PORT = 3000
 
 SEGMENT_WRITE_KEY = "JaFBSHlhMcRfjCovHfFVHIuN5TAj2WkL"
+
+REPO = "alexsands/coyote-badger"
+VERSION = "2.1.1"
