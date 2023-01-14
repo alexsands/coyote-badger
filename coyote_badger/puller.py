@@ -205,18 +205,13 @@ class Puller(object):
             page.fill("#username", hein_username)
             page.fill("#password", hein_password)
             page.click('input[type="submit"]')
-            # Handle Duo push logins that happen inside the Duo iframe
-            page.wait_for_selector("#duo_iframe", timeout=self.timeout(10))
-            duo_frame = page.frames[1]  # Main frame is 1st, Duo is 2nd
-            duo_frame.wait_for_load_state(state="networkidle")
-            duo_push_selector = 'button:has-text("Push")'
-            duo_push_button = duo_frame.wait_for_selector(
-                duo_push_selector, timeout=self.timeout(10)
-            )
-            # Click the Duo "Send Me a Push" button if it is enabled
-            if duo_push_button.is_enabled():
-                duo_push_button.click()
-            page.wait_for_selector("#search_area", timeout=self.timeout(60))
+            # At this point, Hein will redirect to a Duo url that prompts
+            # the user to send a push notification to their phone. Once
+            # they accept the push notification, the Duo site will ask
+            # whether or not to trust the browser. Handle that button.
+            page.click("#trust-browser-button", timeout=self.timeout(60))
+            # Finally, Duo will redirect back to Hein. Wait for the search to appear.
+            page.wait_for_selector("#search_area", timeout=self.timeout(20))
         except Exception as e:
             print(str(e))
             raise Exception("Failed to log in to Hein.")
@@ -302,8 +297,22 @@ class Puller(object):
         page = self.firefox.new_page()
         try:
             page.goto(self.WESTLAW_SEARCH_URL)
-            if page.query_selector("#coid_lightboxOverlay"):
+            # Wait for various Westlaw popups that might occur so we can minimize them
+            try:
+                page.wait_for_selector(
+                    "#coid_lightboxOverlay", timeout=self.timeout(10)
+                )
                 page.click(".co_overlayBox_closeButton")
+            except Exception:
+                pass
+            try:
+                page.wait_for_selector(
+                    "#pendo-guide-container", timeout=self.timeout(10)
+                )
+                page.click('button:has-text("Remind me later")')
+            except Exception:
+                pass
+            # Continue with configuring Westlaw session
             page.click("#jurisdictionId")
             page.click("#co_clearSelectedJurisdictionsBtn")
             page.check("#co_state_all")
