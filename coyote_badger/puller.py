@@ -28,16 +28,16 @@ class Puller(object):
     SCREEN_HEIGHT = 860
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
 
-    HEIN_SIGN_IN_URL = "https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome"
+    HEIN_SIGN_IN_URL = "https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome"  # noqa
     HEIN_AUTHED_URL = "https://heinonline.org/HOL/Welcome"
-    HEIN_SEARCH_URL = "https://heinonline.org/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit="
+    HEIN_SEARCH_URL = "https://heinonline.org/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit="  # noqa
     HEIN_BASE_URL = "https://heinonline.org/HOL/"
 
     WESTLAW_SIGN_IN_URL = "https://lawschool.westlaw.com/redirect/westlaw"
-    WESTLAW_AUTHED_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"
-    WESTLAW_SEARCH_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"
-    WESTLAW_STATUTES_URL = "https://1.next.westlaw.com/Browse/Home/StatutesCourtRules?transitionType=Default&contextData=(sc.Default)"
-    WESTLAW_CASES_URL = "https://1.next.westlaw.com/Browse/Home/Cases?transitionType=Default&contextData=(sc.Default)"
+    WESTLAW_AUTHED_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"  # noqa
+    WESTLAW_SEARCH_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"  # noqa
+    WESTLAW_STATUTES_URL = "https://1.next.westlaw.com/Browse/Home/StatutesCourtRules?transitionType=Default&contextData=(sc.Default)"  # noqa
+    WESTLAW_CASES_URL = "https://1.next.westlaw.com/Browse/Home/Cases?transitionType=Default&contextData=(sc.Default)"  # noqa
 
     SSRN_SIGN_IN_URL = "https://hq.ssrn.com/login/pubsigninjoin.cfm"
     SSRN_AUTHED_URL = "https://hq.ssrn.com/Library/myLibrary.cfm"
@@ -81,7 +81,11 @@ class Puller(object):
                 headless=False,
                 slow_mo=self.SLOW_MO,
                 accept_downloads=True,
-                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 12_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+                user_agent=(
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_2_1) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/98.0.4758.102 Safari/537.36"
+                ),
                 chromium_sandbox=False,
                 ignore_default_args=[
                     "--enable-automation",
@@ -112,7 +116,10 @@ class Puller(object):
                 headless=False,
                 slow_mo=self.SLOW_MO,
                 accept_downloads=True,
-                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 12.2; rv:97.0) Gecko/20100101 Firefox/97.0",
+                user_agent=(
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 12.2; rv:97.0) "
+                    "Gecko/20100101 Firefox/97.0"
+                ),
                 chromium_sandbox=False,
                 ignore_default_args=[
                     "--enable-automation",
@@ -391,7 +398,7 @@ class Puller(object):
                     timeout=self.timeout(15)
                 ) as download_info:
                     new_page.goto(self.HEIN_BASE_URL + a_href)
-            except PlaywrightTimeoutError as e:
+            except PlaywrightTimeoutError:
                 # A timeout might indicate that the warning about too many
                 # downloads recently on this user session is visible.
                 # Click on the "I understand, please proceed" button if so
