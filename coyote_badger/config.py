@@ -10,4 +10,4 @@ PORT = 3000
 SEGMENT_WRITE_KEY = "JaFBSHlhMcRfjCovHfFVHIuN5TAj2WkL"
 
 REPO = "alexsands/coyote-badger"
-VERSION = "2.1.1"
+VERSION = "2.2.0"
