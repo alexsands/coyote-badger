@@ -116,7 +116,7 @@ update your version:
    Then unzip the file and move it to somewhere on your computer that you'll
    remember (e.g., `Documents` folder). You can rename the containing folder
    if you'd like.
-5. Restore your `_projects` folder if you backed it up in step 2.5.
+5. Restore your `_projects` folder if you backed it up in step 2.
 6. That's it! Now you can [run Coyote Badger](#run).
 
 

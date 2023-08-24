@@ -233,6 +233,13 @@ class Puller(object):
             page.fill("#Password", westlaw_password)
             page.click("#SignIn")
             try:
+                # Check if the client selector appears, click it if so
+                page.click("#co_clientIDContinueButton", timeout=self.timeout(10))
+            except Exception as e:
+                # Just ignore failures because this doesn't always show
+                print(str(e))
+                pass
+            try:
                 # Check if the graduation message appears, solved by refresh
                 page.wait_for_selector(
                     "#grade-elite-action-btn", timeout=self.timeout(10)
