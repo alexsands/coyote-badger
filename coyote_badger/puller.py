@@ -447,12 +447,12 @@ class Puller(object):
         """
         save_filepath = project.save_pull_path(filename, "pdf")
         # Check to see if the source has an Original Image...
-        original_img_link = page.query_selector('a:has-text("Original Image")')
+        original_img_link = page.query_selector('a:has-text("original image")')
         # ...if it does, download the original image
         if original_img_link:
-            a_tag = page.query_selector('a:has-text("​Original Image")')
+            a_tag = page.query_selector('a:has-text("original image")')
             page.eval_on_selector(
-                'a:has-text("​Original Image")',
+                'a:has-text("original image")',
                 'link => link.setAttribute("download", "download")',
             )
             with page.expect_download(timeout=self.timeout(20)) as download_info:
