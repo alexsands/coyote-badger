@@ -4,6 +4,7 @@ import shutil
 from urllib.parse import quote
 from urllib.request import urlretrieve
 
+from dotenv import dotenv_values
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
 
@@ -13,6 +14,10 @@ from coyote_badger.source import Kind, Result
 
 
 class Puller(object):
+    URLS = {
+        **dotenv_values(".env.default.urls"),
+        **dotenv_values(".env.custom.urls"),
+    }
     BROWSER_USER_DATA_DIR = os.path.join(PACKAGE_FOLDER, "usr")
     CHROME_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, "chrome")
     FIREFOX_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, "firefox")
@@ -27,20 +32,6 @@ class Puller(object):
     SCREEN_WIDTH = 1200
     SCREEN_HEIGHT = 860
     SLOW_MO = 0.5 * 1000  # 0.5 sec, increase to slow down for debugging
-
-    HEIN_SIGN_IN_URL = "https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome"  # noqa
-    HEIN_AUTHED_URL = "https://heinonline.org/HOL/Welcome"
-    HEIN_SEARCH_URL = "https://heinonline.org/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit="  # noqa
-    HEIN_BASE_URL = "https://heinonline.org/HOL/"
-
-    WESTLAW_SIGN_IN_URL = "https://lawschool.westlaw.com/redirect/westlaw"
-    WESTLAW_AUTHED_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"  # noqa
-    WESTLAW_SEARCH_URL = "https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"  # noqa
-    WESTLAW_STATUTES_URL = "https://1.next.westlaw.com/Browse/Home/StatutesCourtRules?transitionType=Default&contextData=(sc.Default)"  # noqa
-    WESTLAW_CASES_URL = "https://1.next.westlaw.com/Browse/Home/Cases?transitionType=Default&contextData=(sc.Default)"  # noqa
-
-    SSRN_SIGN_IN_URL = "https://hq.ssrn.com/login/pubsigninjoin.cfm"
-    SSRN_AUTHED_URL = "https://hq.ssrn.com/Library/myLibrary.cfm"
 
     def __init__(self):
         """Creates a new Puller with Playwright.
@@ -154,7 +145,7 @@ class Puller(object):
         result = False
         page = self.firefox.new_page()
         try:
-            page.goto(self.HEIN_AUTHED_URL, wait_until="networkidle")
+            page.goto(self.URLS["HEIN_AUTHED_URL"], wait_until="networkidle")
             username = page.query_selector("#username")
             password = page.query_selector("#password")
             if not username or not password:
@@ -171,7 +162,7 @@ class Puller(object):
         result = False
         page = self.firefox.new_page()
         try:
-            page.goto(self.WESTLAW_AUTHED_URL, wait_until="networkidle")
+            page.goto(self.URLS["WESTLAW_AUTHED_URL"], wait_until="networkidle")
             username = page.query_selector("#Username")
             password = page.query_selector("#Password")
             if not username or not password:
@@ -188,7 +179,7 @@ class Puller(object):
         result = False
         page = self.firefox.new_page()
         try:
-            page.goto(self.SSRN_AUTHED_URL, wait_until="networkidle")
+            page.goto(self.URLS["SSRN_AUTHED_URL"], wait_until="networkidle")
             forgot = page.query_selector('a:has-text("Forgot password")')
             if not forgot:
                 result = True
@@ -210,7 +201,7 @@ class Puller(object):
     def login_hein(self, hein_username, hein_password):
         page = self.firefox.new_page()
         try:
-            page.goto(self.HEIN_SIGN_IN_URL)
+            page.goto(self.URLS["HEIN_SIGN_IN_URL"])
             page.fill("#username", hein_username)
             page.fill("#password", hein_password)
             page.click('input[type="submit"]')
@@ -230,7 +221,7 @@ class Puller(object):
     def login_westlaw(self, westlaw_username, westlaw_password):
         page = self.firefox.new_page()
         try:
-            page.goto(self.WESTLAW_SIGN_IN_URL)
+            page.goto(self.URLS["WESTLAW_SIGN_IN_URL"])
             page.fill("#Username", westlaw_username)
             page.fill("#Password", westlaw_password)
             page.click("#SignIn")
@@ -246,7 +237,7 @@ class Puller(object):
                 page.wait_for_selector(
                     "#grade-elite-action-btn", timeout=self.timeout(10)
                 )
-                page.goto(self.WESTLAW_SIGN_IN_URL)
+                page.goto(self.URLS["WESTLAW_SIGN_IN_URL"])
             except Exception as e:
                 # Just ignore failures because this doesn't always show
                 print(str(e))
@@ -262,7 +253,7 @@ class Puller(object):
     def login_ssrn(self, ssrn_username, ssrn_password):
         page = self.firefox.new_page()
         try:
-            page.goto(self.SSRN_SIGN_IN_URL)
+            page.goto(self.URLS["SSRN_SIGN_IN_URL"])
             try:
                 # Click the "Accept all cookies" button if it appears
                 page.click("#onetrust-accept-btn-handler", timeout=self.timeout(10))
@@ -312,7 +303,7 @@ class Puller(object):
         """
         page = self.firefox.new_page()
         try:
-            page.goto(self.WESTLAW_SEARCH_URL)
+            page.goto(self.URLS["WESTLAW_SEARCH_URL"])
             # Wait for various Westlaw popups that might occur so we can minimize them
             try:
                 page.wait_for_selector(
@@ -348,7 +339,7 @@ class Puller(object):
         :param search_term: The search_term to search for
         :type search_term: str
         """
-        page.goto(self.HEIN_SEARCH_URL.format(quote(search_term, safe="")))
+        page.goto(self.URLS["HEIN_SEARCH_URL"].format(quote(search_term, safe="")))
         page.wait_for_selector("#page_content")
         if (
             page.query_selector('#page_content:has-text("No matching results")')
@@ -406,7 +397,7 @@ class Puller(object):
                 with new_page.expect_download(
                     timeout=self.timeout(15)
                 ) as download_info:
-                    new_page.goto(self.HEIN_BASE_URL + a_href)
+                    new_page.goto(self.URLS["HEIN_BASE_URL"] + a_href)
             except PlaywrightTimeoutError:
                 # A timeout might indicate that the warning about too many
                 # downloads recently on this user session is visible.
@@ -735,7 +726,9 @@ class Puller(object):
         if source.kind == Kind.STATE:
             page = self.firefox.new_page()
             try:
-                self._westlaw_search(page, self.WESTLAW_STATUTES_URL, source.short_cite)
+                self._westlaw_search(
+                    page, self.URLS["WESTLAW_STATUTES_URL"], source.short_cite
+                )
                 download_path = self._westlaw_download(
                     page, project, source, source.filename
                 )
@@ -788,7 +781,7 @@ class Puller(object):
                     )
                 # Open the chosen edition in the current tab and download
                 chosen_edition_href = chosen_edition.get_attribute("href")
-                chosen_edition_url = self.HEIN_BASE_URL + chosen_edition_href
+                chosen_edition_url = self.URLS["HEIN_BASE_URL"] + chosen_edition_href
                 page.goto(chosen_edition_url)
                 page.wait_for_selector(".atocpage.sectionhighlight")
                 section_print_a = page.query_selector(
@@ -862,7 +855,9 @@ class Puller(object):
         ):
             page = self.firefox.new_page()
             try:
-                self._westlaw_search(page, self.WESTLAW_CASES_URL, source.short_cite)
+                self._westlaw_search(
+                    page, self.URLS["WESTLAW_CASES_URL"], source.short_cite
+                )
                 download_path = self._westlaw_download(
                     page, project, source, source.filename
                 )
@@ -890,7 +885,9 @@ class Puller(object):
         if source.kind == Kind.NON_SCOTUS:
             page = self.firefox.new_page()
             try:
-                self._westlaw_search(page, self.WESTLAW_CASES_URL, source.short_cite)
+                self._westlaw_search(
+                    page, self.URLS["WESTLAW_CASES_URL"], source.short_cite
+                )
                 download_path = self._westlaw_download(
                     page, project, source, source.filename
                 )
