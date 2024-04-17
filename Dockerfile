@@ -62,7 +62,7 @@ RUN pip3 freeze
 COPY coyote_badger coyote_badger
 COPY xfce4 xfce4
 COPY docker.sh docker.sh
-COPY .env.default.* .env.custom.* ./
+COPY settings.default.* settings.custom.* ./
 
 # Run the boot up script
 RUN chmod +x docker.sh

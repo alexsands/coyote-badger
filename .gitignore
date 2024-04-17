@@ -4,7 +4,7 @@ coyote_badger/usr/
 _projects/*
 _projects/**/*
 !_projects/.gitkeep
-.env.custom.*
+settings.custom.*
 external
 .DS_Store
 

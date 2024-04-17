@@ -7,12 +7,13 @@
 # Badger from somewhere else.
 #
 # To change these values, duplicate this file into the same folder it's in
-# and rename the duplicate from `.env.default.urls` to `.env.custom.urls`.
-# Then modify the values and save the file. On the next start up of Coyote
-# Badger, it will use your new values.
+# and rename the duplicate from `settings.default.urls` to
+# `settings.custom.urls`. Then modify the values inside the quotations below
+# and save the file. On the next start up of Coyote Badger, it will use your
+# new values.
 #
-# This `.env.default.urls` file is shared in the git repository but
-# the `.env.custom.urls` file is ignored, allowing individuals to edit
+# This `settings.default.urls` file is shared in the git repository but
+# the `settings.custom.urls` file is ignored, allowing individuals to edit
 # these values without affecting other users.
 ##############################################################################
 

@@ -15,8 +15,8 @@ from coyote_badger.source import Kind, Result
 
 class Puller(object):
     URLS = {
-        **dotenv_values(".env.default.urls"),
-        **dotenv_values(".env.custom.urls"),
+        **dotenv_values("settings.default.urls"),
+        **dotenv_values("settings.custom.urls"),
     }
     BROWSER_USER_DATA_DIR = os.path.join(PACKAGE_FOLDER, "usr")
     CHROME_USER_DATA_DIR = os.path.join(BROWSER_USER_DATA_DIR, "chrome")

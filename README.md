@@ -111,7 +111,7 @@ update your version:
 1. Stop Coyote Badger using the `__MAC-STOP.command` or `__WINDOWS-STOP.bat`
    files.
 2. Copy the `_projects` folder if you want to save your previous projects.
-3. Copy the `.env.custom.urls` file if you created one to use custom login URLs.
+3. Copy the `settings.custom.urls` file if you created one to use custom login URLs.
 4. Delete your Coyote Badger folder.
 5. Download the latest "Source code (zip)" of Coyote Badger from
    [here](https://github.com/alexsands/coyote-badger/releases/latest).
@@ -119,7 +119,7 @@ update your version:
    remember (e.g., `Documents` folder). You can rename the containing folder
    if you'd like.
 6. Restore your `_projects` folder if you backed it up in step 2.
-7. Restore your `.env.custom.urls` file if you backed it up in step 3.
+7. Restore your `settings.custom.urls` file if you backed it up in step 3.
 8. That's it! Now you can [run Coyote Badger](#run).
 
 
@@ -274,14 +274,14 @@ source pull websites. By default, it is set up to work with The University of
 Texas School of Law's login system, so you will need to change these values
 if you are running Coyote Badger from somewhere else.
 
-To change these values, duplicate the `.env.default.urls` file in the root
-folder (keep it in the same file). Rename the duplicate to `.env.custom.urls`
+To change these values, duplicate the `settings.default.urls` file in the root
+folder (keep it in the same file). Rename the duplicate to `settings.custom.urls`
 (note, the file should start with a period, exactly as shown). Then, open up
 your duplicated file, modify the values, and save the file. On the next start
 up of Coyote Badger, it will use your new values.
 
 When you install a new version of Coyote Badger, just drop your
-`.env.custom.urls` file into the new version.
+`settings.custom.urls` file into the new version.
 
 
 #### Hein login seems to always fail because my Duo isn't working. What do I do?
