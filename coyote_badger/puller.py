@@ -87,6 +87,7 @@ class Puller(object):
                     "Chrome/98.0.4758.102 Safari/537.36"
                 ),
                 chromium_sandbox=False,
+                ignore_https_errors=True,
                 ignore_default_args=[
                     "--enable-automation",
                 ],
@@ -121,6 +122,7 @@ class Puller(object):
                     "Gecko/20100101 Firefox/97.0"
                 ),
                 chromium_sandbox=False,
+                ignore_https_errors=True,
                 ignore_default_args=[
                     "--enable-automation",
                 ],
