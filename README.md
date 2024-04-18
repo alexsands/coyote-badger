@@ -11,6 +11,8 @@
       - [Mac (Intel or Apple Silicon)](#mac-intel-or-apple-silicon)
       - [Windows](#windows)
   - [Update](#update)
+    - [Automatic Update](#automatic-update)
+    - [Manual Update](#manual-update)
   - [Development](#development)
     - [Running from Source in Docker](#running-from-source-in-docker)
     - [Running from Source in Python](#running-from-source-in-python)
@@ -106,8 +108,17 @@ system:
 ## Update
 Please make sure to update to the newest version of Coyote Badger when it is
 released. The content and layout of these websites changes somewhat regularly
-so if you're experiencing issues, it may get fixed in a future release. To
-update your version:
+so if you're experiencing issues, it may get fixed in a future release. You
+can update your Coyote Badger software manually or automatically
+(starting with version `2.2.3`). Automatic updates will save your `_projects`
+folder and your custom variables—you do not need to back these up yourself.
+
+### Automatic Update
+1. Open the `__MAC-UPDATE.command` or `__WINDOWS-UPDATE.bat` file.
+2. Press any key on your keyboard when prompted.
+3. Wait for the update to complete.
+
+### Manual Update
 1. Stop Coyote Badger using the `__MAC-STOP.command` or `__WINDOWS-STOP.bat`
    files.
 2. Copy the `_projects` folder if you want to save your previous projects.
