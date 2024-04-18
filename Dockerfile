@@ -21,14 +21,6 @@ RUN apt-get update && apt-get install -y \
 RUN python3 --version
 RUN pip3 --version
 
-# Install package requirements from PyPI
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-
-# Install playwright browsers
-RUN playwright install chromium firefox
-RUN playwright install-deps chromium firefox
-
 # Install XFCE4 and TigerVNC to run browsers in headful mode
 RUN apt-get update && apt-get install -y \
     xfce4 \
@@ -55,6 +47,14 @@ ENV XFCE_PANEL_MIGRATE_DEFAULT 1
 ADD xfce4/noVNC_full.html noVNC/index.html
 ADD xfce4/noVNC_ui.js noVNC/app/ui.js
 
+# Install package requirements from PyPI
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+
+# Install playwright browsers
+RUN playwright install chromium firefox
+RUN playwright install-deps chromium firefox
+
 # For debugging
 RUN pip3 freeze
 
@@ -62,6 +62,7 @@ RUN pip3 freeze
 COPY coyote_badger coyote_badger
 COPY xfce4 xfce4
 COPY docker.sh docker.sh
+COPY settings.default.* settings.custom.* ./
 
 # Run the boot up script
 RUN chmod +x docker.sh

@@ -1,0 +1,53 @@
+##############################################################################
+# Overview:
+#
+# This file contains the school-dependent URLs for source pull websites.
+# It is set up to work with The University of Texas School of Law's login
+# system, so you will need to change these values if you are running Coyote
+# Badger from somewhere else.
+#
+# To change these values, duplicate this file into the same folder it's in
+# and rename the duplicate from `settings.default.urls` to
+# `settings.custom.urls`. Then modify the values inside the quotations below
+# and save the file. On the next start up of Coyote Badger, it will use your
+# new values.
+#
+# This `settings.default.urls` file is shared in the git repository but
+# the `settings.custom.urls` file is ignored, allowing individuals to edit
+# these values without affecting other users.
+##############################################################################
+
+##############################################################################
+# URLs for HeinOnline
+# - HEIN_SIGN_IN_URL is the page where you enter your username and password
+# - HEIN_AUTHED_URL is the landing page after you successfully log in
+# - HEIN_SEARCH_URL is the URL when you make a citation search on Hein (note
+#   that this string should have a {} in the `cit_string` query parameter)
+# - HEIN_BASE URL is the base URL of your organization's Hein subscription
+##############################################################################
+HEIN_SIGN_IN_URL="https://heinonline.org/HOL/WAYFless?entityID=https%3A%2F%2Fidp.utexas.edu%2Fopenathens&target=https%3A%2F%2Fwww.heinonline.org%2FHOL%2FWelcome"
+HEIN_AUTHED_URL="https://heinonline.org/HOL/Welcome"
+HEIN_SEARCH_URL="https://heinonline.org/HOL/OneBoxCitation?cit_string={}&searchtype=advanced&typea=citation&other_cols=yes&submit=Go&sendit="
+HEIN_BASE_URL="https://heinonline.org/HOL/"
+
+##############################################################################
+# URLs for Westlaw
+# - WESTLAW_SIGN_IN_URL is the page where you enter your username and password
+# - WESTLAW_AUTHED_URL is the landing page after you successfully log in
+# - WESTLAW_SEARCH_URL is the page where you enter a search query on Westlaw
+# - WESTLAW_STATUTES_URL is the page where you search Statutes
+# - WESTLAW_CASES_URL is the page where you search Cases
+##############################################################################
+WESTLAW_SIGN_IN_URL="https://lawschool.westlaw.com/redirect/westlaw"
+WESTLAW_AUTHED_URL="https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"
+WESTLAW_SEARCH_URL="https://1.next.westlaw.com/Search/Home.html?transitionType=Default&contextData=(sc.Default)"
+WESTLAW_STATUTES_URL="https://1.next.westlaw.com/Browse/Home/StatutesCourtRules?transitionType=Default&contextData=(sc.Default)"
+WESTLAW_CASES_URL="https://1.next.westlaw.com/Browse/Home/Cases?transitionType=Default&contextData=(sc.Default)"
+
+##############################################################################
+# URLs for SSRN
+# - SSRN_SIGN_IN_URL is the page where you enter your username and password
+# - SSRN_AUTHED_URL is the landing page after you successfully log in
+##############################################################################
+SSRN_SIGN_IN_URL="https://hq.ssrn.com/login/pubsigninjoin.cfm"
+SSRN_AUTHED_URL="https://hq.ssrn.com/Library/myLibrary.cfm"
