@@ -94,12 +94,24 @@ def create_sources_template(doc_file):
             # Predict short_cite for SCOTUS cases
             if source.kind == Kind.SCOTUS:
                 match = re.search("([0-9]+ .{3,}? [0-9]+)", long_cite)
-                source.short_cite = match.group(1)
+                try:
+                    source.short_cite = match.group(1)
+                except Exception as e:
+                    raise Exception(
+                        "Failed to predict short cite for citation "
+                        '{}: "{}" ({})'.format(fn_num, long_cite, str(e))
+                    )
 
             # Predict short_cite for journals
             if source.kind == Kind.JOURNAL:
                 match = re.search("([0-9]+ .{7,}? [0-9]+)", long_cite)
-                source.short_cite = match.group(1)
+                try:
+                    source.short_cite = match.group(1)
+                except Exception as e:
+                    raise Exception(
+                        "Failed to predict short cite for citation "
+                        '{}: "{}" ({})'.format(fn_num, long_cite, str(e))
+                    )
 
             # For anything else, just leave short_cite blank because
             # there are weird edge cases that aren't worth it. The
